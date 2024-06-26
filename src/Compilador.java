@@ -111,20 +111,21 @@ public class Compilador extends javax.swing.JFrame {
         btnCompilar = new javax.swing.JButton();
         btnEjecutar = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jtaOutputConsole = new javax.swing.JTextArea();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtpCode = new javax.swing.JTextPane();
         jPanel2 = new javax.swing.JPanel();
-        tblSimbolos = new javax.swing.JTabbedPane();
+        TabbedPane = new javax.swing.JTabbedPane();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblTokens = new javax.swing.JTable();
         jScrollPane4 = new javax.swing.JScrollPane();
-        tblTokens1 = new javax.swing.JTable();
+        TblSimbolos = new javax.swing.JTable();
         PnlLogos = new javax.swing.JPanel();
         TxtLogo = new javax.swing.JLabel();
         TxtTec = new javax.swing.JLabel();
+        PnlLogos1 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jtaOutputConsole = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuNuevoArchivo = new javax.swing.JMenuItem();
@@ -227,7 +228,7 @@ public class Compilador extends javax.swing.JFrame {
                 .addComponent(btnGuardarC)
                 .addGap(109, 109, 109)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 170, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnCompilar, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(6, 6, 6)
                 .addComponent(btnEjecutar, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -248,15 +249,8 @@ public class Compilador extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jtaOutputConsole.setEditable(false);
-        jtaOutputConsole.setBackground(new java.awt.Color(255, 255, 255));
-        jtaOutputConsole.setColumns(20);
-        jtaOutputConsole.setRows(5);
-        jtaOutputConsole.setFocusable(false);
-        jScrollPane2.setViewportView(jtaOutputConsole);
-
         jPanel1.setBackground(new java.awt.Color(108, 122, 137));
-        jPanel1.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(200, 195, 199)));
+        jPanel1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         jtpCode.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(200, 195, 199)));
         jScrollPane1.setViewportView(jtpCode);
@@ -283,10 +277,12 @@ public class Compilador extends javax.swing.JFrame {
         );
 
         jPanel2.setBackground(new java.awt.Color(108, 122, 137));
-        jPanel2.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(200, 195, 199)));
+        jPanel2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        tblSimbolos.setBackground(new java.awt.Color(52, 73, 94));
-        tblSimbolos.setForeground(new java.awt.Color(200, 195, 199));
+        TabbedPane.setBackground(new java.awt.Color(52, 73, 94));
+        TabbedPane.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(200, 195, 199)));
+        TabbedPane.setForeground(new java.awt.Color(200, 195, 199));
+        TabbedPane.setFocusable(false);
 
         tblTokens.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -309,9 +305,9 @@ public class Compilador extends javax.swing.JFrame {
         tblTokens.getTableHeader().setReorderingAllowed(false);
         jScrollPane3.setViewportView(tblTokens);
 
-        tblSimbolos.addTab("Tabla de tokens", jScrollPane3);
+        TabbedPane.addTab("Tabla de tokens", jScrollPane3);
 
-        tblTokens1.setModel(new javax.swing.table.DefaultTableModel(
+        TblSimbolos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -327,12 +323,12 @@ public class Compilador extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        tblTokens1.setFocusable(false);
-        tblTokens1.setRowSelectionAllowed(false);
-        tblTokens1.getTableHeader().setReorderingAllowed(false);
-        jScrollPane4.setViewportView(tblTokens1);
+        TblSimbolos.setFocusable(false);
+        TblSimbolos.setRowSelectionAllowed(false);
+        TblSimbolos.getTableHeader().setReorderingAllowed(false);
+        jScrollPane4.setViewportView(TblSimbolos);
 
-        tblSimbolos.addTab("Tabla de simbolos", jScrollPane4);
+        TabbedPane.addTab("Tabla de simbolos", jScrollPane4);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -340,14 +336,14 @@ public class Compilador extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tblSimbolos)
+                .addComponent(TabbedPane)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tblSimbolos, javax.swing.GroupLayout.DEFAULT_SIZE, 455, Short.MAX_VALUE)
+                .addComponent(TabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 461, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -379,6 +375,33 @@ public class Compilador extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
+        PnlLogos1.setBackground(new java.awt.Color(108, 122, 137));
+        PnlLogos1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+
+        jtaOutputConsole.setEditable(false);
+        jtaOutputConsole.setBackground(new java.awt.Color(255, 255, 255));
+        jtaOutputConsole.setColumns(20);
+        jtaOutputConsole.setRows(5);
+        jtaOutputConsole.setFocusable(false);
+        jScrollPane2.setViewportView(jtaOutputConsole);
+
+        javax.swing.GroupLayout PnlLogos1Layout = new javax.swing.GroupLayout(PnlLogos1);
+        PnlLogos1.setLayout(PnlLogos1Layout);
+        PnlLogos1Layout.setHorizontalGroup(
+            PnlLogos1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PnlLogos1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2)
+                .addContainerGap())
+        );
+        PnlLogos1Layout.setVerticalGroup(
+            PnlLogos1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(PnlLogos1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout rootPanelLayout = new javax.swing.GroupLayout(rootPanel);
         rootPanel.setLayout(rootPanelLayout);
         rootPanelLayout.setHorizontalGroup(
@@ -390,8 +413,8 @@ public class Compilador extends javax.swing.JFrame {
                     .addGroup(rootPanelLayout.createSequentialGroup()
                         .addGroup(rootPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane2))
-                        .addGap(6, 6, 6)
+                            .addComponent(PnlLogos1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(rootPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(PnlLogos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
@@ -408,7 +431,7 @@ public class Compilador extends javax.swing.JFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(rootPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
+                    .addComponent(PnlLogos1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(PnlLogos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -825,6 +848,9 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JMenu AcercaDe;
     private javax.swing.JMenuItem BtnIntegrantes;
     private javax.swing.JPanel PnlLogos;
+    private javax.swing.JPanel PnlLogos1;
+    private javax.swing.JTabbedPane TabbedPane;
+    private javax.swing.JTable TblSimbolos;
     private javax.swing.JLabel TxtLogo;
     private javax.swing.JLabel TxtTec;
     private javax.swing.JButton btnAbrir;
@@ -856,8 +882,6 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JTextPane jtpCode;
     private javax.swing.JMenu mEjecutar;
     private javax.swing.JPanel rootPanel;
-    private javax.swing.JTabbedPane tblSimbolos;
     private javax.swing.JTable tblTokens;
-    private javax.swing.JTable tblTokens1;
     // End of variables declaration//GEN-END:variables
 }

@@ -3,7 +3,8 @@ VARIABLES{
   ENTERO #B = 5;
   ENTERO #C = 6;
   ENTERO #F = 8;
-
+  TEXTO #A = ADSA4;
+}
 
 PROCESOS {
   SUMA [#A ,#B] = #C;

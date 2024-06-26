@@ -763,30 +763,32 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("main", "(bloque_procesos)", 2, "Error Sintactico {}: Falta abrir el bloque variables [#,%]");
         gramatica.group("main", "(bloque_variables)", 3, "Error Sintactico {}: Falta abrir el bloque procesos [#,%]");
 
-        jtaOutputConsole.append(gramatica.toString());
+        // jtaOutputConsole.append(gramatica.toString());
         gramatica.initialLineColumn();
 
         gramatica.show();
     }
 
     private void semanticAnalysis() {
-        
-        
-        // VALE ÑONGA
         HashMap<String, String> identDataType = new HashMap<>();
-        //                  CLAVE     VALOR
-        identDataType.put("entero", "ENTERO");
+        // Definición de tipos de datos
+        identDataType.put("BOOLEANO", "BOOLEANO");
+        identDataType.put("CADENA", "CADENA");
+        identDataType.put("FLOTANTE", "FLOTANTE");
+        identDataType.put("ENTERO", "ENTERO");
+        identDataType.put("NUMERO", "NUMERO");
         for (Production id : identProd) {
-            if (!identDataType.get(id.lexemeRank(0)).equals(id.lexemeRank(-1))) {
+            if (!identDataType.get(id.lexemeRank(0)).equals(id.lexicalCompRank(3))) {
                 errors.add(new ErrorLSSL(1, "Error semantico {}: valor no compatible con el tipo de dato [#,%]", id, true));
-            } else if (id.lexicalCompRank(-1).equals("ENTERO") && !id.lexemeRank(-1).matches("[0-9]*")) {
-                errors.add(new ErrorLSSL(2, "Error semantico {}: el valor no es un numero entero [#,%]", id, false));
 
-            }else {
-                identificadores.put(id.lexemeRank(1), id.lexemeRank(-1));
+            } else if (id.lexicalCompRank(0).equals("ENTERO") && !id.lexemeRank(3).matches("[0-9]+")) {
+                errors.add(new ErrorLSSL(2, "Error semantico {}: el valor no es un numero entero [#,%]", id, false));
+            } else if (id.lexicalCompRank(0).equals("CADENA") && !id.lexemeRank(-1).matches("[a-zA-z]+")) {
+                errors.add(new ErrorLSSL(3, "Error semantico {}: el valor no es un cadena [#,%]", id, false));
+            } else {
+                identificadores.put(id.lexemeRank(1), id.lexemeRank(3));
             }
-            
-            System.out.println("\nSemantico: " + id);
+            System.out.println("\nSemantico:\n" + id);
         }
     }
 

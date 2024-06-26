@@ -690,7 +690,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.delete(new String[]{"ERROR", "ERROR_1", "Error_2"}, 1);
 
         // Gramática para definición de variables
-        gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA");
+        gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", identProd);
         gramatica.group("variable", "IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 103, "Falta colocar el tipo de variable a definir [#,%]");
         gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 104, "Falta colocar el nombre de la variable a definir [#,%]");
         gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) IDENTIFICADOR (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 105, "Falta colocar el --> = [#,%]");
@@ -770,6 +770,24 @@ public class Compilador extends javax.swing.JFrame {
     }
 
     private void semanticAnalysis() {
+        
+        
+        // VALE ÑONGA
+        HashMap<String, String> identDataType = new HashMap<>();
+        //                  CLAVE     VALOR
+        identDataType.put("entero", "ENTERO");
+        for (Production id : identProd) {
+            if (!identDataType.get(id.lexemeRank(0)).equals(id.lexemeRank(-1))) {
+                errors.add(new ErrorLSSL(1, "Error semantico {}: valor no compatible con el tipo de dato [#,%]", id, true));
+            } else if (id.lexicalCompRank(-1).equals("ENTERO") && !id.lexemeRank(-1).matches("[0-9]*")) {
+                errors.add(new ErrorLSSL(2, "Error semantico {}: el valor no es un numero entero [#,%]", id, false));
+
+            }else {
+                identificadores.put(id.lexemeRank(1), id.lexemeRank(-1));
+            }
+            
+            System.out.println("\nSemantico: " + id);
+        }
     }
 
     private void fillTableTokens() {
@@ -843,6 +861,16 @@ public class Compilador extends javax.swing.JFrame {
             new Compilador().setVisible(true);
         });
     }
+
+    //Getters and Setters
+    public Grammar getGramatica() {
+        return gramatica;
+    }
+
+    public void setGramatica(Grammar gramatica) {
+        this.gramatica = gramatica;
+    }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu AcercaDe;

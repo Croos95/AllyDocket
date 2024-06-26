@@ -31,6 +31,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -47,6 +49,7 @@ public class Compilador extends javax.swing.JFrame {
     private ArrayList<Production> identProd;
     private HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
+    private HashMap<String, String> tablaSimbolos;
     Grammar gramatica;
 
     /**
@@ -93,6 +96,7 @@ public class Compilador extends javax.swing.JFrame {
         textsColor = new ArrayList<>();
         identProd = new ArrayList<>();
         identificadores = new HashMap<>();
+        tablaSimbolos = new HashMap<>();
         Functions.setAutocompleterJTextComponent(new String[]{"VAR { \n  \n }"}, jtpCode, () -> {
             timerKeyReleased.restart();
         });
@@ -771,11 +775,12 @@ public class Compilador extends javax.swing.JFrame {
     }
 
     private void semanticAnalysis() {
+            DefaultTableModel tablaS = (DefaultTableModel) TblSimbolos.getModel();
         HashMap<String, String> identDataType = new HashMap<>();
         // Definición de tipos de datos
         identDataType.put("BOOLEANO", "BOOLEANO");
-        identDataType.put("CADENA", "CADENA");
-        identDataType.put("FLOTANTE", "FLOTANTE");
+        identDataType.put("TEXTO", "TEXTO");
+        identDataType.put("DECIMAL", "DECIMAL");
         identDataType.put("ENTERO", "ENTERO");
         identDataType.put("SUMA", "SUMA");
 
@@ -783,22 +788,25 @@ public class Compilador extends javax.swing.JFrame {
             String tipoDato = id.lexemeRank(0);
             String valorAsignado = id.lexemeRank(3);
             String tipoEsperado = identDataType.get(tipoDato);
-
+            System.out.println(tipoDato);
             // Errores Tipos de datos incompatibles con las variables
             if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
                 errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
             } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
                 errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
-            } else if (tipoDato.equals("CADENA") && !valorAsignado.matches("[a-zA-Z]+")) {
+            } else if (tipoDato.equals("TEXTO") && !valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
                 errors.add(new ErrorLSSL(3, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
-            } else if (tipoDato.equals("FLOTANTE") && !valorAsignado.matches("[+-]?([0-9]*[.])?[0-9]+([eE][+-]?[0-9]+)?")) {
+            } else if (tipoDato.equals("DECIMAL") && !valorAsignado.matches("[+-]?([0-9]*[.])?[0-9]+([eE][+-]?[0-9]+)?")) {
                 errors.add(new ErrorLSSL(4, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
             } else if (tipoDato.equals("BOOLEANO") && !valorAsignado.matches("verdadero|falso")) {
                 errors.add(new ErrorLSSL(5, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
             } else {
                 identificadores.put(id.lexemeRank(1), valorAsignado);
+                tablaSimbolos.put(id.lexemeRank(1), valorAsignado);
+                tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});
+                System.out.println("Agregado a la tabla de simbolos : "+identificadores.toString());
             }
-            System.out.println("\nSemantico:\n " + "LEXEMAS: " + id.lexemeRank(0, -1) + "\n  COMPONENTES LEXICOS: " + id.lexicalCompRank(0, -1));
+//            System.out.println("\nSemantico:\n " + "LEXEMAS: " + id.lexemeRank(0, -1) + "\n  COMPONENTES LEXICOS: " + id.lexicalCompRank(0, -1));
         }
     }
 

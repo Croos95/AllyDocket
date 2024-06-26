@@ -117,8 +117,11 @@ public class Compilador extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jtpCode = new javax.swing.JTextPane();
         jPanel2 = new javax.swing.JPanel();
+        tblSimbolos = new javax.swing.JTabbedPane();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblTokens = new javax.swing.JTable();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        tblTokens1 = new javax.swing.JTable();
         PnlLogos = new javax.swing.JPanel();
         TxtLogo = new javax.swing.JLabel();
         TxtTec = new javax.swing.JLabel();
@@ -224,7 +227,7 @@ public class Compilador extends javax.swing.JFrame {
                 .addComponent(btnGuardarC)
                 .addGap(109, 109, 109)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 170, Short.MAX_VALUE)
                 .addComponent(btnCompilar, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(6, 6, 6)
                 .addComponent(btnEjecutar, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -253,7 +256,9 @@ public class Compilador extends javax.swing.JFrame {
         jScrollPane2.setViewportView(jtaOutputConsole);
 
         jPanel1.setBackground(new java.awt.Color(108, 122, 137));
+        jPanel1.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(200, 195, 199)));
 
+        jtpCode.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(200, 195, 199)));
         jScrollPane1.setViewportView(jtpCode);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -278,6 +283,10 @@ public class Compilador extends javax.swing.JFrame {
         );
 
         jPanel2.setBackground(new java.awt.Color(108, 122, 137));
+        jPanel2.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(200, 195, 199)));
+
+        tblSimbolos.setBackground(new java.awt.Color(52, 73, 94));
+        tblSimbolos.setForeground(new java.awt.Color(200, 195, 199));
 
         tblTokens.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -300,25 +309,50 @@ public class Compilador extends javax.swing.JFrame {
         tblTokens.getTableHeader().setReorderingAllowed(false);
         jScrollPane3.setViewportView(tblTokens);
 
+        tblSimbolos.addTab("Tabla de tokens", jScrollPane3);
+
+        tblTokens1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Token", "Tipo de dato", "Valor"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        tblTokens1.setFocusable(false);
+        tblTokens1.setRowSelectionAllowed(false);
+        tblTokens1.getTableHeader().setReorderingAllowed(false);
+        jScrollPane4.setViewportView(tblTokens1);
+
+        tblSimbolos.addTab("Tabla de simbolos", jScrollPane4);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane3)
+                .addComponent(tblSimbolos)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+            .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 455, Short.MAX_VALUE)
+                .addComponent(tblSimbolos, javax.swing.GroupLayout.DEFAULT_SIZE, 455, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         PnlLogos.setBackground(new java.awt.Color(108, 122, 137));
-        PnlLogos.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        PnlLogos.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(200, 195, 199)));
 
         TxtLogo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
@@ -352,15 +386,15 @@ public class Compilador extends javax.swing.JFrame {
             .addGroup(rootPanelLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(rootPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(rootPanelLayout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(6, 6, 6)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(buttonsFilePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(rootPanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 693, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(PnlLogos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGroup(rootPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2))
+                        .addGap(6, 6, 6)
+                        .addGroup(rootPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(PnlLogos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         rootPanelLayout.setVerticalGroup(
@@ -374,7 +408,7 @@ public class Compilador extends javax.swing.JFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(rootPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
                     .addComponent(PnlLogos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -715,32 +749,6 @@ public class Compilador extends javax.swing.JFrame {
     private void semanticAnalysis() {
     }
 
-//    private void colorAnalysis() {
-//        /* Limpiar el arreglo de colores */
-//        textsColor.clear();
-//        /* Extraer rangos de colores */
-//        LexerColor lexerColor;
-//        try {
-//            File codigo = new File("color.encrypter");
-//            FileOutputStream output = new FileOutputStream(codigo);
-//            byte[] bytesText = jtpCode.getText().getBytes();
-//            output.write(bytesText);
-//            BufferedReader entrada = new BufferedReader(new InputStreamReader(new FileInputStream(codigo), "UTF8"));
-//            lexerColor = new LexerColor(entrada);
-//            while (true) {
-//                TextColor textColor = lexerColor.yylex();
-//                if (textColor == null) {
-//                    break;
-//                }
-//                textsColor.add(textColor);
-//            }
-//        } catch (FileNotFoundException ex) {
-//            System.out.println("El archivo no pudo ser encontrado... " + ex.getMessage());
-//        } catch (IOException ex) {
-//            System.out.println("Error al escribir en el archivo... " + ex.getMessage());
-//        }
-//        Functions.colorTextPane(textsColor, jtpCode, new Color(40, 40, 40));
-//    }
     private void fillTableTokens() {
         tokens.forEach(token -> {
             Object[] data = new Object[]{token.getLexicalComp(), token.getLexeme(), "[" + token.getLine() + ", " + token.getColumn() + "]"};
@@ -841,12 +849,15 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator6;
     private javax.swing.JTextArea jtaOutputConsole;
     private javax.swing.JTextPane jtpCode;
     private javax.swing.JMenu mEjecutar;
     private javax.swing.JPanel rootPanel;
+    private javax.swing.JTabbedPane tblSimbolos;
     private javax.swing.JTable tblTokens;
+    private javax.swing.JTable tblTokens1;
     // End of variables declaration//GEN-END:variables
 }

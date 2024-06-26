@@ -690,12 +690,12 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.delete(new String[]{"ERROR", "ERROR_1", "Error_2"}, 1);
 
         // Gramática para definición de variables
-        gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", identProd);
+        gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION ( CADENA |NDECIMAL|NUMERO|FALSO|VERDADERO) FINLINEA", identProd);
         gramatica.group("variable", "IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 103, "Falta colocar el tipo de variable a definir [#,%]");
-        gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 104, "Falta colocar el nombre de la variable a definir [#,%]");
-        gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) IDENTIFICADOR (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 105, "Falta colocar el --> = [#,%]");
-        gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) IDENTIFICADOR ASIGNACION FINLINEA", 106, "Falta colocar el valor a asignar [#,%]");
-        gramatica.group("variable", "(BOOLEANO | CADENA | FLOTANTE | ENTERO) IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO)", 107, "Falta colocar el fin de linea --> ; [#,%]");
+        gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) ASIGNACION ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 104, "Falta colocar el identificador de la variable a definir [#,%]");
+        gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 105, "Falta colocar la asignacion --> '='  [#,%]");
+        gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION FINLINEA", 106, "Falta colocar el valor a asignar [#,%]");
+        gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION (CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO)", 107, "Falta colocar el fin de linea --> ; [#,%]");
 
         // Definición de comparaciones
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)");
@@ -766,6 +766,7 @@ public class Compilador extends javax.swing.JFrame {
         // jtaOutputConsole.append(gramatica.toString());
         gramatica.initialLineColumn();
 
+        jtaOutputConsole.append(gramatica.toString());
         gramatica.show();
     }
 
@@ -776,19 +777,28 @@ public class Compilador extends javax.swing.JFrame {
         identDataType.put("CADENA", "CADENA");
         identDataType.put("FLOTANTE", "FLOTANTE");
         identDataType.put("ENTERO", "ENTERO");
-        identDataType.put("NUMERO", "NUMERO");
-        for (Production id : identProd) {
-            if (!identDataType.get(id.lexemeRank(0)).equals(id.lexicalCompRank(3))) {
-                errors.add(new ErrorLSSL(1, "Error semantico {}: valor no compatible con el tipo de dato [#,%]", id, true));
+        identDataType.put("SUMA", "SUMA");
 
-            } else if (id.lexicalCompRank(0).equals("ENTERO") && !id.lexemeRank(3).matches("[0-9]+")) {
-                errors.add(new ErrorLSSL(2, "Error semantico {}: el valor no es un numero entero [#,%]", id, false));
-            } else if (id.lexicalCompRank(0).equals("CADENA") && !id.lexemeRank(-1).matches("[a-zA-z]+")) {
-                errors.add(new ErrorLSSL(3, "Error semantico {}: el valor no es un cadena [#,%]", id, false));
+        for (Production id : identProd) {
+            String tipoDato = id.lexemeRank(0);
+            String valorAsignado = id.lexemeRank(3);
+            String tipoEsperado = identDataType.get(tipoDato);
+
+            // Errores Tipos de datos incompatibles con las variables
+            if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
+                errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
+            } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
+                errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
+            } else if (tipoDato.equals("CADENA") && !valorAsignado.matches("[a-zA-Z]+")) {
+                errors.add(new ErrorLSSL(3, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
+            } else if (tipoDato.equals("FLOTANTE") && !valorAsignado.matches("[+-]?([0-9]*[.])?[0-9]+([eE][+-]?[0-9]+)?")) {
+                errors.add(new ErrorLSSL(4, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
+            } else if (tipoDato.equals("BOOLEANO") && !valorAsignado.matches("verdadero|falso")) {
+                errors.add(new ErrorLSSL(5, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
             } else {
-                identificadores.put(id.lexemeRank(1), id.lexemeRank(3));
+                identificadores.put(id.lexemeRank(1), valorAsignado);
             }
-            System.out.println("\nSemantico:\n" + id);
+            System.out.println("\nSemantico:\n " + "LEXEMAS: " + id.lexemeRank(0, -1) + "\n  COMPONENTES LEXICOS: " + id.lexicalCompRank(0, -1));
         }
     }
 

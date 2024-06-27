@@ -47,6 +47,7 @@ public class Compilador extends javax.swing.JFrame {
     private ArrayList<TextColor> textsColor;
     private Timer timerKeyReleased;
     private ArrayList<Production> identProd;
+    private ArrayList<Production> mainProd;
     private HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
     private HashMap<String, String> tablaSimbolos;
@@ -95,6 +96,7 @@ public class Compilador extends javax.swing.JFrame {
         errors = new ArrayList<>();
         textsColor = new ArrayList<>();
         identProd = new ArrayList<>();
+        mainProd = new ArrayList<>();
         identificadores = new HashMap<>();
         tablaSimbolos = new HashMap<>();
         Functions.setAutocompleterJTextComponent(new String[]{"VAR { \n  \n }"}, jtpCode, () -> {
@@ -754,7 +756,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA CORC", 429, "Error Sintactico {}: Falta las operaciones [#,%]");
 
         // Bloques de procesos y variables
-        gramatica.group("bloque_procesos", "PROCESOS CORA (operaciones | estructura_si | estructura_mientras)* CORC");
+        gramatica.group("bloque_procesos", "PROCESOS CORA (operaciones | estructura_si | estructura_mientras)* CORC", mainProd);
         gramatica.group("bloque_procesos", "PROCESOS (operaciones | estructura_si | estructura_mientras)* CORC", 9, "Error Sintactico {}: Falta abrir el corchete inicial bloque procesos[#,%]");
         gramatica.group("bloque_procesos", "PROCESOS CORA (operaciones | estructura_si | estructura_mientras)*", 10, "Error Sintactico {}: Falta cerrar el corchete bloque procesos [#,%]");
 
@@ -763,10 +765,9 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("bloque_variables", "VARIABLES CORA (variable)*", 7, "Error Sintactico {}: Falta cerrar el corchete bloque variables [#,%]");
 
         //Bloque main
-        gramatica.group("main", "(bloque_variables) (bloque_procesos)");
-        gramatica.group("main", "(bloque_procesos)", 2, "Error Sintactico {}: Falta abrir el bloque variables [#,%]");
-        gramatica.group("main", "(bloque_variables)", 3, "Error Sintactico {}: Falta abrir el bloque procesos [#,%]");
-
+//        gramatica.group("main", "(bloque_variables) (bloque_procesos)");
+//        gramatica.group("main", "(bloque_procesos)", 2, "Error Sintactico {}: Falta abrir el bloque variables [#,%]");
+//        gramatica.group("main", "(bloque_variables)", 3, "Error Sintactico {}: Falta abrir el bloque procesos [#,%]");
         // jtaOutputConsole.append(gramatica.toString());
         gramatica.initialLineColumn();
 
@@ -775,7 +776,7 @@ public class Compilador extends javax.swing.JFrame {
     }
 
     private void semanticAnalysis() {
-            DefaultTableModel tablaS = (DefaultTableModel) TblSimbolos.getModel();
+        DefaultTableModel tablaS = (DefaultTableModel) TblSimbolos.getModel();
         HashMap<String, String> identDataType = new HashMap<>();
         // Definición de tipos de datos
         identDataType.put("BOOLEANO", "BOOLEANO");
@@ -804,11 +805,31 @@ public class Compilador extends javax.swing.JFrame {
                 identificadores.put(id.lexemeRank(1), valorAsignado);
                 tablaSimbolos.put(id.lexemeRank(1), valorAsignado);
                 tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});
-                System.out.println("Agregado a la tabla de simbolos : "+identificadores.toString());
+                System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
             }
 //            System.out.println("\nSemantico:\n " + "LEXEMAS: " + id.lexemeRank(0, -1) + "\n  COMPONENTES LEXICOS: " + id.lexicalCompRank(0, -1));
-        }
-    }
+        }//for identProd
+
+        // Recorrer la producción principal en búsqueda de una variable
+        if (!mainProd.isEmpty()) {
+            for (Token main : mainProd.get(0).getTokens()) {
+                String lexema = main.getLexeme();
+                if ("IDENTIFICADOR".equals(main.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
+                    System.out.println("todo bien------------");
+                } else {
+                    if (!"IDENTIFICADOR".equals(main.getLexicalComp())) {
+                        System.out.println("todo bien------------");
+                    } else {
+                        System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + lexema);
+                        
+                        
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: este identificador no está declarado [#,%] = "+ lexema, main));
+                    }
+                }//IF
+            }//FOR mainProd
+        }//IF
+
+    }//metodo semantico
 
     private void fillTableTokens() {
         tokens.forEach(token -> {
@@ -840,6 +861,8 @@ public class Compilador extends javax.swing.JFrame {
         errors.clear();
         identProd.clear();
         identificadores.clear();
+        mainProd.clear();
+        tablaSimbolos.clear();
         codeHasBeenCompiled = false;
     }
 

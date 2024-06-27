@@ -778,19 +778,18 @@ public class Compilador extends javax.swing.JFrame {
     private void semanticAnalysis() {
         DefaultTableModel tablaS = (DefaultTableModel) TblSimbolos.getModel();
         HashMap<String, String> identDataType = new HashMap<>();
-        // Definición de tipos de datos
+// Definición de tipos de datos--------------------------------------------------------------------------------------------------------------
         identDataType.put("BOOLEANO", "BOOLEANO");
         identDataType.put("TEXTO", "TEXTO");
         identDataType.put("DECIMAL", "DECIMAL");
         identDataType.put("ENTERO", "ENTERO");
         identDataType.put("SUMA", "SUMA");
-
+        // Errores Tipos de datos incompatibles con las variables
         for (Production id : identProd) {
             String tipoDato = id.lexemeRank(0);
             String valorAsignado = id.lexemeRank(3);
             String tipoEsperado = identDataType.get(tipoDato);
             System.out.println(tipoDato);
-            // Errores Tipos de datos incompatibles con las variables
             if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
                 errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
             } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
@@ -802,14 +801,27 @@ public class Compilador extends javax.swing.JFrame {
             } else if (tipoDato.equals("BOOLEANO") && !valorAsignado.matches("verdadero|falso")) {
                 errors.add(new ErrorLSSL(5, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
             } else {
-                identificadores.put(id.lexemeRank(1), valorAsignado);
-                tablaSimbolos.put(id.lexemeRank(1), valorAsignado);
-                tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});
-                System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
+                // Verificar si la variable ya está en el conjunto de identificadores
+                
+                String variable = id.lexemeRank(1); //Almacenar variable temporal con el lexema osease el identificador como tal Ejemplo #C3
+                if (identificadores.containsKey(variable))//Utilizamos el identificador para buscar duplicados en el HashMap de iidentificadores ya guardados
+                {
+                    //Si encuentra duplicados emite el error y lo almacena tambien
+                    System.out.println("Error: Variable duplicada = " + variable);
+                    errors.add(new ErrorLSSL(7, "Error semántico {}: declaracion de variable duplicada [#,%] = "+ variable, id, false));
+                } else {
+                    //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
+                     identificadores.put(id.lexemeRank(1), valorAsignado);
+                    tablaSimbolos.put(id.lexemeRank(1), valorAsignado);
+                    tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});//tambien se mandan a la tabla en la GUI
+                    System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
+                }
             }
-//            System.out.println("\nSemantico:\n " + "LEXEMAS: " + id.lexemeRank(0, -1) + "\n  COMPONENTES LEXICOS: " + id.lexicalCompRank(0, -1));
-        }//for identProd
 
+        }//for identProd
+// Errores Tipos de datos incompatibles con las variables-------------------------------------------------------------------
+
+//Error de variable siendo usada sin declararse------------------------------------------------------------------------------
         // Recorrer la producción principal en búsqueda de una variable
         if (!mainProd.isEmpty()) {
             for (Token main : mainProd.get(0).getTokens()) {
@@ -821,14 +833,15 @@ public class Compilador extends javax.swing.JFrame {
                         System.out.println("todo bien------------");
                     } else {
                         System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + lexema);
-                        
-                        
-                        errors.add(new ErrorLSSL(6, "Error semántico {}: este identificador no está declarado [#,%] = "+ lexema, main));
+
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: este identificador no está declarado [#,%] = " + lexema, main));
                     }
                 }//IF
             }//FOR mainProd
         }//IF
+//Error de variable siendo usada sin declararse------------------------------------------------------------------------------
 
+//Error de 
     }//metodo semantico
 
     private void fillTableTokens() {

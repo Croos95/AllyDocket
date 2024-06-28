@@ -697,7 +697,7 @@ public class Compilador extends javax.swing.JFrame {
 
         // Gramática para definición de variables
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION ( CADENA |NDECIMAL|NUMERO|FALSO|VERDADERO) FINLINEA", identProd);
-        gramatica.group("variable", "IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 103, "Falta colocar el tipo de variable a definir [#,%]");
+        gramatica.group("variable", "IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 103, "Falta colocar el tipo de dato a definir [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) ASIGNACION ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 104, "Falta colocar el identificador de la variable a definir [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 105, "Falta colocar la asignacion --> '='  [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION FINLINEA", 106, "Falta colocar el valor a asignar [#,%]");
@@ -779,6 +779,7 @@ public class Compilador extends javax.swing.JFrame {
         DefaultTableModel tablaS = (DefaultTableModel) TblSimbolos.getModel();
         HashMap<String, String> identDataType = new HashMap<>();
 // Definición de tipos de datos--------------------------------------------------------------------------------------------------------------
+                            //llave    //valor
         identDataType.put("BOOLEANO", "BOOLEANO");
         identDataType.put("TEXTO", "TEXTO");
         identDataType.put("DECIMAL", "DECIMAL");
@@ -790,8 +791,10 @@ public class Compilador extends javax.swing.JFrame {
             String valorAsignado = id.lexemeRank(3);
             String tipoEsperado = identDataType.get(tipoDato);
             System.out.println(tipoDato);
+                    //SI NO ES EL TIPO ESPERADO
             if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
                 errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
+                                
             } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
                 errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
             } else if (tipoDato.equals("TEXTO") && !valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
@@ -802,7 +805,6 @@ public class Compilador extends javax.swing.JFrame {
                 errors.add(new ErrorLSSL(5, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
             } else {
                 // Verificar si la variable ya está en el conjunto de identificadores
-                
                 String variable = id.lexemeRank(1); //Almacenar variable temporal con el lexema osease el identificador como tal Ejemplo #C3
                 if (identificadores.containsKey(variable))//Utilizamos el identificador para buscar duplicados en el HashMap de iidentificadores ya guardados
                 {
@@ -811,7 +813,8 @@ public class Compilador extends javax.swing.JFrame {
                     errors.add(new ErrorLSSL(7, "Error semántico {}: declaracion de variable duplicada [#,%] = "+ variable, id, false));
                 } else {
                     //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
-                     identificadores.put(id.lexemeRank(1), valorAsignado);
+                    identificadores.put(id.lexemeRank(1), valorAsignado);
+                                            //LLAVE       VALOR
                     tablaSimbolos.put(id.lexemeRank(1), valorAsignado);
                     tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});//tambien se mandan a la tabla en la GUI
                     System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
@@ -824,6 +827,7 @@ public class Compilador extends javax.swing.JFrame {
 //Error de variable siendo usada sin declararse------------------------------------------------------------------------------
         // Recorrer la producción principal en búsqueda de una variable
         if (!mainProd.isEmpty()) {
+                //DEVUELVE LA PRODUCCION      DEVUELVE UNA LISTA DE LOS TOKENS DE LA PRODUCCION
             for (Token main : mainProd.get(0).getTokens()) {
                 String lexema = main.getLexeme();
                 if ("IDENTIFICADOR".equals(main.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
@@ -869,6 +873,7 @@ public class Compilador extends javax.swing.JFrame {
 
     private void clearFields() {
         Functions.clearDataInTable(tblTokens);
+        Functions.clearDataInTable(TblSimbolos);
         jtaOutputConsole.setText("");
         tokens.clear();
         errors.clear();

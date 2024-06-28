@@ -2,7 +2,6 @@ VARIABLES {
 	ENTERO #A1 = 12;
 	DECIMAL #B2 = 10.0;
 	TEXTO #C3 = "HOLA";
-	ENTERO #C3 = 134;
 	BOOLEANO #D4 = falso;
 }
 

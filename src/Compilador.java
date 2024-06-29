@@ -48,7 +48,8 @@ public class Compilador extends javax.swing.JFrame {
     private Timer timerKeyReleased;
     private ArrayList<Production> identProd;
     private ArrayList<Production> mainProd;
-    private HashMap<String, String> identificadores;
+    private ArrayList<Production> compProd;
+    private HashMap<String, String[]> identificadores;
     private boolean codeHasBeenCompiled = false;
     private HashMap<String, String> tablaSimbolos;
     Grammar gramatica;
@@ -704,7 +705,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION (CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO)", 107, "Falta colocar el fin de linea --> ; [#,%]");
 
         // Definición de comparaciones
-        gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)");
+        gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", compProd);
         gramatica.group("comparacion", "(IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", 100, "Falta colocar el primer valor [#,%]");
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IDENTIFICADOR | NUMERO)", 101, "Falta colocar la operacion de comparacion [#,%]");
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO)", 102, "Falta colocar el valor a comparar [#,%]");
@@ -774,12 +775,22 @@ public class Compilador extends javax.swing.JFrame {
         jtaOutputConsole.append(gramatica.toString());
         gramatica.show();
     }
+    //Metodo para recorrer el HashMap de la Tabla de Simbolos
+
+    public String existeEnTablaSimbolos(String llave) {
+        if (tablaSimbolos.containsKey(llave)) {
+            return tablaSimbolos.get(llave);
+        } else {
+            return "el valor que intentas acceder no Existe!!! " + llave;
+        }
+
+    }
 
     private void semanticAnalysis() {
         DefaultTableModel tablaS = (DefaultTableModel) TblSimbolos.getModel();
         HashMap<String, String> identDataType = new HashMap<>();
 // Definición de tipos de datos--------------------------------------------------------------------------------------------------------------
-                            //llave    //valor
+        //llave    //valor
         identDataType.put("BOOLEANO", "BOOLEANO");
         identDataType.put("TEXTO", "TEXTO");
         identDataType.put("DECIMAL", "DECIMAL");
@@ -791,10 +802,10 @@ public class Compilador extends javax.swing.JFrame {
             String valorAsignado = id.lexemeRank(3);
             String tipoEsperado = identDataType.get(tipoDato);
             System.out.println(tipoDato);
-                    //SI NO ES EL TIPO ESPERADO
+            //SI NO ES EL TIPO ESPERADO
             if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
                 errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
-                                
+
             } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
                 errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
             } else if (tipoDato.equals("TEXTO") && !valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
@@ -810,11 +821,12 @@ public class Compilador extends javax.swing.JFrame {
                 {
                     //Si encuentra duplicados emite el error y lo almacena tambien
                     System.out.println("Error: Variable duplicada = " + variable);
-                    errors.add(new ErrorLSSL(7, "Error semántico {}: declaracion de variable duplicada [#,%] = "+ variable, id, false));
+                    errors.add(new ErrorLSSL(7, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable, id, false));
                 } else {
                     //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
-                    identificadores.put(id.lexemeRank(1), valorAsignado);
-                                            //LLAVE       VALOR
+                    String [] temp ={valorAsignado, tipoEsperado};
+                    identificadores.put(id.lexemeRank(1), temp);
+                    //LLAVE       VALOR
                     tablaSimbolos.put(id.lexemeRank(1), valorAsignado);
                     tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});//tambien se mandan a la tabla en la GUI
                     System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
@@ -827,26 +839,42 @@ public class Compilador extends javax.swing.JFrame {
 //Error de variable siendo usada sin declararse------------------------------------------------------------------------------
         // Recorrer la producción principal en búsqueda de una variable
         if (!mainProd.isEmpty()) {
-                //DEVUELVE LA PRODUCCION      DEVUELVE UNA LISTA DE LOS TOKENS DE LA PRODUCCION
+            //DEVUELVE LA PRODUCCION      DEVUELVE UNA LISTA DE LOS TOKENS DE LA PRODUCCION
             for (Token main : mainProd.get(0).getTokens()) {
                 String lexema = main.getLexeme();
                 if ("IDENTIFICADOR".equals(main.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
                     System.out.println("todo bien------------");
+                    //SI ES IDENTIFICADOR Y ESTA EN LA TABLA DE SIMBOLOS ENTONCES DETERMINAR SI ESTAN EN UNA COMPARACION
+
                 } else {
                     if (!"IDENTIFICADOR".equals(main.getLexicalComp())) {
                         System.out.println("todo bien------------");
                     } else {
                         System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + lexema);
-
                         errors.add(new ErrorLSSL(6, "Error semántico {}: este identificador no está declarado [#,%] = " + lexema, main));
                     }
                 }//IF
             }//FOR mainProd
         }//IF
 //Error de variable siendo usada sin declararse------------------------------------------------------------------------------
-
-//Error de 
     }//metodo semantico
+
+//    private void comparacionCheck() {
+//        HashMap<String ,String> temp = null;
+//        if (!compProd.isEmpty()) {
+//            for (Token linea : compProd.get(0).getTokens()) {
+//                String lexema = linea.getLexeme();
+//                if ("IDENTIFICADOR".equals(linea.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
+//                    temp.put(lexema, tablaSimbolos.get(lexema));
+//                    for (var obj : temp) {
+//                        if(tablaSimbolos.get(obj).equals(o)){
+//                            
+//                        }
+//                    }
+//                }//if
+//            }//for
+//        }//if
+//    }//comparacionCheck
 
     private void fillTableTokens() {
         tokens.forEach(token -> {

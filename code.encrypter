@@ -1,13 +1,12 @@
 VARIABLES {
-	ENTERO #A1 = 12.1;
-	DECIMAL #B2 = 12.1;
-	TEXTO #C3 = "HOLA";
+	ENTERO #A1 = 12;
+	DECIMAL #B2 = 10.0;
 	TEXTO #C3 = "HOLA";
 	BOOLEANO #D4 = falso;
 }
 
 PROCESOS {
-	SI(#C3==#D5){
+	SI(#C3==#D4){
 	
 	}
 }

@@ -1,13 +1,21 @@
-VARIABLES {
-	ENTERO #A1 = 12.1;
-	DECIMAL #B2 = 12.1;
-	TEXTO #C3 = "HOLA";
-	TEXTO #C3 = "HOLA";
-	BOOLEANO #D4 = falso;
+VARIABLES{
+  ENTERO #A = 10;
+  ENTERO #B = 5;
+  ENTERO #C = 6;
+  ENTERO #F = 8;
 }
 
 PROCESOS {
-	SI(#C3==#D5){
-	
-	}
+  SUMA [#A ,#B] = #C;
+  SI(#A << #B){
+    MULTIPLICACION [#A ,#B] = #C;
+    SI(#B << #C){
+      SUMA [#A,#B] = #C;	
+    }
+  }
+  
+    SI (#C << #F){
+      DIVISION[#C,#F] = #A;
+    
+  }   
 }

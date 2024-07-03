@@ -805,96 +805,77 @@ public class Compilador extends javax.swing.JFrame {
     }
 
     private void semanticAnalysis() {
-        // Para inicializar la tabla de símbolos
         DefaultTableModel tablaS = (DefaultTableModel) TblSimbolos.getModel();
-        // Hash map para tipos de datos
-        HashMap<String, String> tiposDatos = new HashMap<>();
-        tiposDatos.put("ENTERO", "ENTERO");
-        tiposDatos.put("TEXTO", "TEXTO");
-        tiposDatos.put("DECIMAL", "DECIMAL");
-        tiposDatos.put("VERDADERO", "BOOLEANO");
-        tiposDatos.put("FALSO", "BOOLEANO");
-
-        // Conjunto de identificadores declarados
-        HashMap<String, String> identificadores = new HashMap<>();
-
-        // Verificar declaraciones de variables
+        HashMap<String, String> identDataType = new HashMap<>();
+// Definición de tipos de datos--------------------------------------------------------------------------------------------------------------
+        //llave    //valor
+        identDataType.put("BOOLEANO", "BOOLEANO");
+        identDataType.put("TEXTO", "TEXTO");
+        identDataType.put("DECIMAL", "DECIMAL");
+        identDataType.put("ENTERO", "ENTERO");
+        identDataType.put("SUMA", "SUMA");
+        // Errores Tipos de datos incompatibles con las variables
         for (Production id : identProd) {
             String tipoDato = id.lexemeRank(0);
-            String variable = id.lexemeRank(1);
             String valorAsignado = id.lexemeRank(3);
-            String tipoEsperado = tiposDatos.get(tipoDato);
+            String tipoEsperado = identDataType.get(tipoDato);
+            System.out.println(tipoDato);
+            //SI NO ES EL TIPO ESPERADO
+            if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
+                errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
 
-            if (tipoEsperado == null) {
-                errors.add(new ErrorLSSL(1, "Error semántico: tipo de dato no válido [#, %]", id, true));
-            } else if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
-                errors.add(new ErrorLSSL(1, "Error semántico: valor no compatible con el tipo de dato [#, %]", id, true));
             } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
-                errors.add(new ErrorLSSL(2, "Error semántico: el valor no es un número entero [#, %]", id, false));
+                errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
             } else if (tipoDato.equals("TEXTO") && !valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
-                errors.add(new ErrorLSSL(3, "Error semántico: el valor no es una cadena [#, %]", id, false));
+                errors.add(new ErrorLSSL(3, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
             } else if (tipoDato.equals("DECIMAL") && !valorAsignado.matches("[+-]?([0-9]*[.])?[0-9]+([eE][+-]?[0-9]+)?")) {
-                errors.add(new ErrorLSSL(4, "Error semántico: el valor no es un número flotante [#, %]", id, false));
+                errors.add(new ErrorLSSL(4, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
             } else if (tipoDato.equals("BOOLEANO") && !valorAsignado.matches("verdadero|falso")) {
-                errors.add(new ErrorLSSL(5, "Error semántico: solo se acepta 'verdadero' o 'falso' [#, %]", id, false));
+                errors.add(new ErrorLSSL(5, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
             } else {
-                if (identificadores.containsKey(variable)) {
-                    errors.add(new ErrorLSSL(7, "Error semántico: declaración de variable duplicada [#, %] = " + variable, id, false));
+                // Verificar si la variable ya está en el conjunto de identificadores
+                String variable = id.lexemeRank(1); //Almacenar variable temporal con el lexema osease el identificador como tal Ejemplo #C3
+                if (identificadores.containsKey(variable))//Utilizamos el identificador para buscar duplicados en el HashMap de iidentificadores ya guardados
+                {
+                    //Si encuentra duplicados emite el error y lo almacena tambien
+                    System.out.println("Error: Variable duplicada = " + variable);
+                    errors.add(new ErrorLSSL(7, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable, id, false));
                 } else {
-                    identificadores.put(variable, tipoEsperado);
-                    tablaS.addRow(new Object[]{variable, tipoEsperado, valorAsignado});
-                    System.out.println("Agregado a la tabla de símbolos: " + identificadores.toString());
+                    //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
+                    identificadores.put(id.lexemeRank(1), valorAsignado);
+                    //LLAVE       VALOR
+                    tablaSimbolos.put(id.lexemeRank(1), valorAsignado);
+                    tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});//tambien se mandan a la tabla en la GUI
+                    System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
                 }
             }
 
-            // Verificar uso de variables no declaradas
-        }
-        System.out.println(Arrays.asList(identificadores)); // muestra identificadores
+        }//for identProd
+// Errores Tipos de datos incompatibles con las variables-------------------------------------------------------------------
 
-        // Verificar uso de variables no declaradas
-        // Primero obtener temporalmente identificadores para comparar despues
-        ArrayList<String> identificadoresTemp = new ArrayList<>();
-        HashSet<String> identificadoresUnicos = new HashSet<>();
-        for (int i = 0; i < tblTokens.getRowCount(); i++) {
-            String token = (String) tblTokens.getValueAt(i, 0);
-            if (token.equals("IDENTIFICADOR")) {
-                String lexemaTemp = (String) tblTokens.getValueAt(i, 1);
-                if (identificadoresUnicos.add(lexemaTemp)) {
-                    identificadoresTemp.add(lexemaTemp);
-                }
-            }
-        }
-        System.out.println("Identificadores encontrados: " + identificadoresTemp);
+//Error de variable siendo usada sin declararse------------------------------------------------------------------------------
+        // Recorrer la producción principal en búsqueda de una variable
+        if (!mainProd.isEmpty()) {
+            //DEVUELVE LA PRODUCCION      DEVUELVE UNA LISTA DE LOS TOKENS DE LA PRODUCCION
+            for (Token main : mainProd.get(0).getTokens()) {
+                String lexema = main.getLexeme();
+                if ("IDENTIFICADOR".equals(main.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
+                    System.out.println("todo bien------------");
+                } else {
+                    if (!"IDENTIFICADOR".equals(main.getLexicalComp())) {
+                        System.out.println("todo bien------------");
+                    } else {
+                        System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + lexema);
 
-//
-//            // Verificar operaciones
-//            if (process.lexemeRank(0).equals("SUMA") || process.lexemeRank(0).equals("MULTIPLICACION")
-//                    || process.lexemeRank(0).equals("DIVISION") || process.lexemeRank(0).equals("RESTA")) {
-//                String operador = process.lexemeRank(0);
-//                String var1 = process.lexemeRank(1);
-//                String var2 = process.lexemeRank(2);
-//                String result = process.lexemeRank(4);
-//
-//                if (!identificadores.containsKey(var1)) {
-//                    errors.add(new ErrorLSSL(9, "Error semántico: variable no declarada [#, %] = " + var1, process, false));
-//                }
-//                if (!identificadores.containsKey(var2)) {
-//                    errors.add(new ErrorLSSL(9, "Error semántico: variable no declarada [#, %] = " + var2, process, false));
-//                }
-//                if (!identificadores.containsKey(result)) {
-//                    errors.add(new ErrorLSSL(9, "Error semántico: variable no declarada [#, %] = " + result, process, false));
-//                }
-//
-//                // Verificar tipos compatibles
-//                String tipoVar1 = identificadores.get(var1);
-//                String tipoVar2 = identificadores.get(var2);
-//                String tipoResult = identificadores.get(result);
-//
-//                if (!tipoVar1.equals("ENTERO") || !tipoVar2.equals("ENTERO") || !tipoResult.equals("ENTERO")) {
-//                    errors.add(new ErrorLSSL(10, "Error semántico: tipos incompatibles para operación " + operador + " [#, %]", process, false));
-//                }
-//            }
-    }
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: este identificador no está declarado [#,%] = " + lexema, main));
+                    }
+                }//IF
+            }//FOR mainProd
+        }//IF
+//Error de variable siendo usada sin declararse------------------------------------------------------------------------------
+
+//Error de 
+    }//metodo semantico
 
     private void fillTableTokens() {
         tokens.forEach(token -> {

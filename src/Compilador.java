@@ -1037,7 +1037,6 @@ public class Compilador extends javax.swing.JFrame {
                 }
             }//for
         }//if
-
 //
     }//metodo semantico
 // Método para actualizar la JTable
@@ -1093,7 +1092,6 @@ public class Compilador extends javax.swing.JFrame {
         tablaSimbolos.clear();
         diviProd.clear();
         codeHasBeenCompiled = false;
-
     }
 
     /**

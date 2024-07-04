@@ -6,7 +6,7 @@ VARIABLES {
 }
 
 PROCESOS {
-	SI(#F==#G4){
+	SI(#C3==#D5){
 	
 	}
 }

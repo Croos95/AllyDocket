@@ -716,12 +716,14 @@ public class Compilador extends javax.swing.JFrame {
 
         // Gramática para definición de variables
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION ( CADENA |NDECIMAL|NUMERO|FALSO|VERDADERO) FINLINEA", identProd);
-        gramatica.group("variable", "IDENTIFICADOR ASIGNACION (BOOL | STRING_LITERAL | NUMERO) FINLINEA", 103, "Falta colocar el tipo de dato a definir [#,%]");
+        gramatica.group("variable", "IDENTIFICADOR ASIGNACION ( CADENA |NDECIMAL|NUMERO|FALSO|VERDADERO) FINLINEA", 103, "Falta colocar el tipo de dato a definir [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) ASIGNACION ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 104, "Falta colocar el identificador de la variable a definir [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 105, "Falta colocar la asignacion --> '='  [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION FINLINEA", 106, "Falta colocar el valor a asignar [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION (CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO)", 107, "Falta colocar el fin de linea --> ; [#,%]");
-
+        // Definicion de asignacion
+        gramatica.group("asignacion", "IDENTIFICADOR ASIGNACION (BOOLEANO | TEXTO | DECIMAL | ENTERO) FINLINEA", asigProdConID);
+        gramatica.group("asignacion", "IDENTIFICADOR ASIGNACION (IDENTIFICADOR|CADENA |NDECIMAL|NUMERO|FALSO|VERDADERO) FINLINEA", asigProd);
         // Definición de comparaciones
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", compProd);
         gramatica.group("comparacion", "(IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", 100, "Falta colocar el primer valor [#,%]");
@@ -853,28 +855,22 @@ public class Compilador extends javax.swing.JFrame {
         }//for identProd
 // Errores Tipos de datos incompatibles con las variables-------------------------------------------------------------------
 
-//Error de variable siendo usada sin declararse------------------------------------------------------------------------------
-        // Recorrer la producción principal en búsqueda de una variable
+// Error de variable siendo usada sin declararse------------------------------------------------------------------------------
         if (!mainProd.isEmpty()) {
-            //DEVUELVE LA PRODUCCION      DEVUELVE UNA LISTA DE LOS TOKENS DE LA PRODUCCION
-            for (Token main : mainProd.get(0).getTokens()) {
-                String lexema = main.getLexeme();
-                if ("IDENTIFICADOR".equals(main.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
-                    System.out.println("todo bien------------");
-                } else {
-                    if (!"IDENTIFICADOR".equals(main.getLexicalComp())) {
-                        System.out.println("todo bien------------");
+            // Recorrer la producción principal en búsqueda de una variable
+            for (Token token : mainProd.get(0).getTokens()) {
+                if ("IDENTIFICADOR".equals(token.getLexicalComp())) {
+                    String lexema = token.getLexeme();
+                    if (!tablaSimbolos.containsKey(lexema)) {
+                        System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + token.getLexeme());
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: este identificador no está declarado [#,%] = " + token.getLexeme(), token));
                     } else {
-                        System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + lexema);
-
-                        errors.add(new ErrorLSSL(6, "Error semántico {}: este identificador no está declarado [#,%] = " + lexema, main));
+                        System.out.println("todo bien------------");
                     }
-                }//IF
-            }//FOR mainProd
-        }//IF
-//Error de variable siendo usada sin declararse------------------------------------------------------------------------------
-
-//Error de 
+                }//if
+            }//for
+        }//if
+// Error de variable siendo usada sin declararse------------------------------------------------------------------------------
     }//metodo semantico
 
     private void fillTableTokens() {

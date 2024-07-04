@@ -39,7 +39,8 @@ import javax.swing.table.DefaultTableModel;
  * @author Allydocket
  */
 public class Compilador extends javax.swing.JFrame {
- private String title;
+
+    private String title;
     private Directory directorio;
     private ArrayList<Token> tokens;
     private ArrayList<ErrorLSSL> errors;
@@ -52,12 +53,12 @@ public class Compilador extends javax.swing.JFrame {
     private ArrayList<Production> asigProdConID;
     private ArrayList<Production> opProd;
     private ArrayList<Token> tokensTemp;
+    private ArrayList<Production> diviProd;
     private HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
-    private HashMap<String, String> tablaSimbolos;
+    private HashMap<String, String[]> tablaSimbolos;
+    DefaultTableModel tablaS;
     Grammar gramatica;
-
-
 
     /**
      * Creates new form Compilador
@@ -98,7 +99,7 @@ public class Compilador extends javax.swing.JFrame {
         Functions.insertAsteriskInName(this, jtpCode, () -> {
             timerKeyReleased.restart();
         });
-         tokens = new ArrayList<>();
+        tokens = new ArrayList<>();
         errors = new ArrayList<>();
         textsColor = new ArrayList<>();
         identProd = new ArrayList<>();
@@ -109,8 +110,8 @@ public class Compilador extends javax.swing.JFrame {
         asigProdConID = new ArrayList<>();
         compProd = new ArrayList<>();
         opProd = new ArrayList<>();
-
-
+        diviProd = new ArrayList<>();
+        tablaS = (DefaultTableModel) TblSimbolos.getModel();
         Functions.setAutocompleterJTextComponent(new String[]{"VAR { \n  \n }"}, jtpCode, () -> {
             timerKeyReleased.restart();
         });
@@ -714,7 +715,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 105, "Falta colocar la asignacion --> '='  [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION FINLINEA", 106, "Falta colocar el valor a asignar [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION (CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO)", 107, "Falta colocar el fin de linea --> ; [#,%]");
-         // Definicion de asignacion
+        // Definicion de asignacion
         gramatica.group("asignacion", "IDENTIFICADOR ASIGNACION (BOOLEANO | TEXTO | DECIMAL | ENTERO) FINLINEA", asigProdConID);
         gramatica.group("asignacion", "IDENTIFICADOR ASIGNACION (IDENTIFICADOR|CADENA |NDECIMAL|NUMERO|FALSO|VERDADERO) FINLINEA", asigProd);
         // Definición de comparaciones        Este es [0]                                           Este es [1]                                                                             Este es [2]
@@ -732,7 +733,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 205, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 206, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 207, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("raiz_cua", "RAIZ_CUADRADA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 301, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 302, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -740,7 +741,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 304, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 305, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 306, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("raiz_ene", "RAIZ_ENESIMA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 401, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 402, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -757,7 +758,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 504, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 505, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 506, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("log_b10", "LOGARITMO_BASE_10 IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 601, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 602, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -765,7 +766,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 604, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 605, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 606, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("exponencial", "EXPONENCIAL IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 701, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 702, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -773,7 +774,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 704, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 705, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 706, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("val_abso", "VALOR_ABSOLUTO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 801, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 802, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -781,7 +782,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 804, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 805, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 806, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("facto", "FACTORIAL IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 901, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 902, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -789,7 +790,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 904, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 905, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 906, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("redondeo", "REDONDEO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1001, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1002, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -797,7 +798,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1004, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1005, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1006, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1101, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1102, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -805,7 +806,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1104, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1105, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1106, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1201, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 1202, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -813,7 +814,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 1204, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1205, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1206, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1301, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
         gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 1302, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
@@ -821,10 +822,10 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 1304, "Error Sintactico {}: Falta la asignación [#,%]");
         gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1305, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1306, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         // Definición de grupos de operaciones
         gramatica.group("operaciones_avanzadas", "potencia | raiz_cua | raiz_ene | loga_nat | log_b10 | exponencial | val_abso | facto | redondeo | redon_abajo | mcd | mcm");
-        
+
         gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | COSENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | TANGENTE PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("operaciones_trigonometricas", "SENO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1401, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura en SENO [#,%]");
         gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1402, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre en SENO [#,%]");
@@ -832,30 +833,30 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1404, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre en SENO [#,%]");
         gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1405, "Error Sintactico {}: Falta el identificador después de la asignación en SENO [#,%]");
         gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1406, "Error Sintactico {}: Falta el fin de línea en SENO [#,%]");
-        
+
         gramatica.group("operaciones_trigonometricas", "COSENO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1407, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura en COSENO [#,%]");
         gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1408, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre en COSENO [#,%]");
         gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1409, "Error Sintactico {}: Falta el identificador después de COSENO [#,%]");
         gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1410, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre en COSENO [#,%]");
         gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1411, "Error Sintactico {}: Falta el identificador después de la asignación en COSENO [#,%]");
         gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1412, "Error Sintactico {}: Falta el fin de línea en COSENO [#,%]");
-        
+
         gramatica.group("operaciones_trigonometricas", "TANGENTE IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1413, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura en TANGENTE [#,%]");
         gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1414, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre en TANGENTE [#,%]");
         gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1415, "Error Sintactico {}: Falta el identificador después de TANGENTE [#,%]");
         gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1416, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre en TANGENTE [#,%]");
         gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1417, "Error Sintactico {}: Falta el identificador después de la asignación en TANGENTE [#,%]");
         gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1418, "Error Sintactico {}: Falta el fin de línea en TANGENTE [#,%]");
-        
-        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("operaciones_basicas", "PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1501, "Error Sintactico {}: Falta colocar la operación básica (SUMA, RESTA, MULTIPLICACION, DIVISION, MODULO) [#,%]");
-        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1502, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
-        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 1503, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
-        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1504, "Error Sintactico {}: Falta el identificador después del paréntesis cuadrado de apertura [#,%]");
-        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 1505, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre [#,%]");
-        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1506, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
-        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1507, "Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+        //0                                              1        2                 3            4          5         6         7         8
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | DIVISION |MULTIPLICACION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("operaciones_basicas", "PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1501, "Error Sintactico {}: Falta colocar la operación básica a realizar [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | DIVISION |MULTIPLICACION  | MODULO) IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1502, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | DIVISION |MULTIPLICACION  | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 1503, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA |DIVISION| MULTIPLICACION  | MODULO) PARCUAA (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1504, "Error Sintactico {}: Falta el identificador después del paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA |DIVISION| MULTIPLICACION  | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 1505, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA |DIVISION| MULTIPLICACION  | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1506, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA |DIVISION| MULTIPLICACION  | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1507, "Error Sintactico {}: Falta el fin de línea [#,%]");
+
         gramatica.group("operaciones_estadisticas", "MEDIANA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | VAR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | DESVESTA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | PROMEDIO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("operaciones_estadisticas", "PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1601, "Error Sintactico {}: Falta colocar la operación estadística (MEDIANA, VAR, DESVESTA, PROMEDIO) [#,%]");
         gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1602, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
@@ -865,8 +866,8 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1606, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1607, "Error Sintactico {}: Falta el fin de línea [#,%]");
 
-         gramatica.group("operaciones", "(operaciones_basicas | operaciones_avanzadas | operaciones_trigonometricas | operaciones_comparacion | operaciones_estadisticas)*", opProd);
-        
+        gramatica.group("operaciones", "(operaciones_basicas | operaciones_avanzadas | operaciones_trigonometricas | operaciones_comparacion | operaciones_estadisticas)*", opProd);
+
         // Definición de estructuras de control
         gramatica.loopForFunExecUntilChangeNotDetected(() -> {
             gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC");
@@ -913,17 +914,8 @@ public class Compilador extends javax.swing.JFrame {
     }
     //Metodo para recorrer el HashMap de la Tabla de Simbolos
 
-    public String existeEnTablaSimbolos(String llave) {
-        if (tablaSimbolos.containsKey(llave)) {
-            return tablaSimbolos.get(llave);
-        } else {
-            return "el valor que intentas acceder no Existe!!! " + llave;
-        }
-
-    }
-
     private void semanticAnalysis() {
-        DefaultTableModel tablaS = (DefaultTableModel) TblSimbolos.getModel();
+
         HashMap<String, String> identDataType = new HashMap<>();
 // Definición de tipos de datos--------------------------------------------------------------------------------------------------------------
         //llave    //valor
@@ -961,9 +953,11 @@ public class Compilador extends javax.swing.JFrame {
                 } else {
                     //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
                     identificadores.put(id.lexemeRank(1), tipoDato);
-                                            //LLAVE       VALOR
-                    tablaSimbolos.put(id.lexemeRank(1), tipoDato);
-                    tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});//tambien se mandan a la tabla en la GUI
+                    //LLAVE       VALOR[tipoDato, valor]
+                    String[] datos = {tipoDato, valorAsignado};
+                    tablaSimbolos.put(id.lexemeRank(1), datos);
+                    String[] getDatos = tablaSimbolos.get(id.lexemeRank(1));
+                    tablaS.addRow(new Object[]{id.lexemeRank(1), getDatos[0], getDatos[1]});//tambien se mandan a la tabla en la GUI
                     System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
                 }
             }
@@ -994,32 +988,69 @@ public class Compilador extends javax.swing.JFrame {
                 String comparador1 = comp.lexemeRank(0);//#id1
                 String comparador2 = comp.lexemeRank(2);//#id2
                 // si  #id1 --> tipo de dato  != #id2 --> tipo de dato
-                if (!tablaSimbolos.get(comparador1).equals(tablaSimbolos.get(comparador2))) {
-                    errors.add(new ErrorLSSL(5, "Error semántico {}: comparacion de tipos Incompatibles [#,%] = " + tablaSimbolos.get(comparador1) + " y " + tablaSimbolos.get(comparador2), comp, false));
+                if (!identificadores.get(comparador1).equals(identificadores.get(comparador2))) {
+                    errors.add(new ErrorLSSL(5, "Error semántico {}: comparacion de tipos Incompatibles [#,%] = [" + identificadores.get(comparador1) + "] y [" + identificadores.get(comparador2) + "]", comp, false));
                 }//If
+                else {
+                    //aqui va la salida en consola
+                }
             }//For
         }//If
 //comparacion de tipos Incompatibles-------------------------------------------------------------------------------
-      
-//Operacion de tipos Incompatibles----------------------------------------------------------------------------------
- if (!opProd.isEmpty()) {
-    // Recorrer la producción de operaciones
-    for (int i = 0; i < opProd.size(); i++) {
-         tokensTemp = opProd.get(i).getTokens();
-        for (Token temp : tokensTemp) {
-            String lexema = temp.getLexeme();
-            if ("IDENTIFICADOR".equals(temp.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
-                String tipo = tablaSimbolos.get(lexema);
-                if (!"ENTERO".equals(tipo) || "DECIMAL".equals(tipo)) {
-                    errors.add(new ErrorLSSL(5, "Error semántico {}: Operación de tipos incompatibles [#,%]", temp));
-                }//if
-            }//if 
-        }//for
-    }//for
-}//if
-//Operacion de tipos Incompatibles----------------------------------------------------------------------------------
+
+        if (!opProd.isEmpty()) {
+            // Recorrer la producción de operaciones
+            for (int i = 0; i < opProd.size(); i++) {
+                //ERROR AL DIVIDIR ENTRE 0-------------------------------------
+                //Comprobar que la operacion es una division
+                if (opProd.get(i).lexemeRank(0).equals("DIVISION")) {
+                    //Segregar la produccion para eliminar el identificador donde se asigna la operacion y dejar los operadores
+                    String divisor = opProd.get(i).lexemeRank(2);
+                    String dividendo = opProd.get(i).lexemeRank(4);
+                    //Encontrar el identificador, y determinar si es diferente que 0
+                    String[] dividendoD = tablaSimbolos.get(dividendo);
+                    String[] divisorD = tablaSimbolos.get(divisor);
+                    if (dividendoD[1].equals("0") || dividendo.equals("0")) {
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: No se puede dividir entre 0 [#,%]", opProd.get(i), false));
+                    } else {
+                        if (dividendoD[0].equals("ENTERO") && divisorD[0].equals("ENTERO")) {
+                            int operacion = Integer.parseInt(divisorD[1]) / Integer.parseInt(dividendoD[1]);
+                            String[] datosActu = {"ENTERO", String.valueOf(operacion)};
+                            tablaSimbolos.put(opProd.get(i).lexemeRank(7), datosActu);
+                            // Actualizar JTable con los valores actualizados
+                            actualizarJTable(opProd.get(i).lexemeRank(7), datosActu);
+                        } else if (dividendoD[0].equals("DECIMAL") && divisorD[0].equals("DECIMAL")) {
+                            float operacion = Float.parseFloat(divisorD[1]) / Float.parseFloat(dividendoD[1]);
+                            String[] datosActu = {"DECIMAL", String.valueOf(operacion)};
+                            tablaSimbolos.put(opProd.get(i).lexemeRank(7), datosActu);
+                            // Actualizar JTable con los valores actualizados
+                            actualizarJTable(opProd.get(i).lexemeRank(7), datosActu);
+                        } else {
+                            errors.add(new ErrorLSSL(7, "Error semántico {}: comparacion de tipos Incompatibles [#,%]", opProd.get(i), false));
+                        }
+                    }
+                } //ERROR AL DIVIDIR ENTRE 0-------------------------------------
+                else {
+                    //Operacion de tipos Incompatibles----------------------------------------------------------------------------------
+                    errors.add(new ErrorLSSL(7, "Error semántico {}: comparacion de tipos Incompatibles [#,%]", opProd.get(i), false));
+                    //Operacion de tipos Incompatibles----------------------------------------------------------------------------------
+                }
+            }//for
+        }//if
+
 //
     }//metodo semantico
+// Método para actualizar la JTable
+
+    private void actualizarJTable(String identificador, String[] datosActualizados) {
+        for (int row = 0; row < tablaS.getRowCount(); row++) {
+            if (tablaS.getValueAt(row, 0).equals(identificador)) {
+                tablaS.setValueAt(datosActualizados[0], row, 1);
+                tablaS.setValueAt(datosActualizados[1], row, 2);
+                break;
+            }
+        }
+    }
 
     private void fillTableTokens() {
         tokens.forEach(token -> {
@@ -1028,7 +1059,7 @@ public class Compilador extends javax.swing.JFrame {
         });
     }
 
-     private void printConsole() {
+    private void printConsole() {
 
         if (!errors.isEmpty()) {
             System.out.println("AUN HAY ERRORRES");
@@ -1060,10 +1091,10 @@ public class Compilador extends javax.swing.JFrame {
         opProd.clear();
         compProd.clear();
         tablaSimbolos.clear();
+        diviProd.clear();
         codeHasBeenCompiled = false;
-        
-    }
 
+    }
 
     /**
      * @param args the command line arguments

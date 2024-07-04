@@ -1,12 +1,16 @@
 VARIABLES {
 	ENTERO #A1 = 12;
+	ENTERO #A2 = 6;
+	ENTERO #A3 = 0 ;
 	DECIMAL #B2 = 10.0;
 	TEXTO #C3 = "HOLA";
+	
 	BOOLEANO #D4 = falso;
 }
 
 PROCESOS {
-	SI(#C3==#D5){
+	SI(#A3==#A1){
 	
 	}
+	DIVISION[#A1,#A2]=#A3;
 }

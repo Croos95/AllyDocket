@@ -732,25 +732,148 @@ public class Compilador extends javax.swing.JFrame {
 
         // Definición de operaciones avanzadas
         gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("potencia", "POTENCIA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 201, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 202, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("potencia", "POTENCIA PARCUAA (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 203, "Error Sintactico {}: Falta el identificador después de POTENCIA [#,%]");
+        gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 204, "Error Sintactico {}: Falta el separador entre identificadores [#,%]");
+        gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 205, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 206, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("potencia", "POTENCIA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 207, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
         gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("raiz_cua", "RAIZ_CUADRADA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 301, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 302, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 303, "Error Sintactico {}: Falta el identificador después de RAIZ_CUADRADA [#,%]");
+        gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 304, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 305, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 306, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
         gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("raiz_ene", "RAIZ_ENESIMA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 401, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 402, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 403, "Error Sintactico {}: Falta el identificador después de RAIZ_ENESIMA [#,%]");
+        gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA IDENTIFICADOR IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 404, "Error Sintactico {}: Falta el separador entre identificadores [#,%]");
+        gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 405, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 406, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("raiz_ene", "RAIZ_ENESIMA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 407, "Error Sintactico {}: Falta el fin de línea [#,%]");
 
+        gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("loga_nat", "LOGARITMO_NATURAL IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 501, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 502, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 503, "Error Sintactico {}: Falta el identificador después de LOGARITMO_NATURAL [#,%]");
+        gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 504, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 505, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("loga_nat", "LOGARITMO_NATURAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 506, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("log_b10", "LOGARITMO_BASE_10 IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 601, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 602, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 603, "Error Sintactico {}: Falta el identificador después de LOGARITMO_BASE_10 [#,%]");
+        gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 604, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 605, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("log_b10", "LOGARITMO_BASE_10 PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 606, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("exponencial", "EXPONENCIAL IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 701, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 702, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("exponencial", "EXPONENCIAL PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 703, "Error Sintactico {}: Falta el identificador después de EXPONENCIAL [#,%]");
+        gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 704, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 705, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("exponencial", "EXPONENCIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 706, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("val_abso", "VALOR_ABSOLUTO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 801, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 802, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 803, "Error Sintactico {}: Falta el identificador después de VALOR_ABSOLUTO [#,%]");
+        gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 804, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 805, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("val_abso", "VALOR_ABSOLUTO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 806, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("facto", "FACTORIAL IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 901, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 902, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("facto", "FACTORIAL PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 903, "Error Sintactico {}: Falta el identificador después de FACTORIAL [#,%]");
+        gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 904, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 905, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("facto", "FACTORIAL PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 906, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("redondeo", "REDONDEO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1001, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1002, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("redondeo", "REDONDEO PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1003, "Error Sintactico {}: Falta el identificador después de REDONDEO [#,%]");
+        gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1004, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1005, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("redondeo", "REDONDEO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1006, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1101, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1102, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1103, "Error Sintactico {}: Falta el identificador después de REDONDEO_HACIA_ABAJO [#,%]");
+        gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1104, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1105, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("redon_abajo", "REDONDEO_HACIA_ABAJO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1106, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1201, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 1202, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1203, "Error Sintactico {}: Falta el identificador después de MAXIMO_COMUN_DIVISOR [#,%]");
+        gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 1204, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1205, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("mcd", "MAXIMO_COMUN_DIVISOR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1206, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1301, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 1302, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1303, "Error Sintactico {}: Falta el identificador después de MINIMO_COMUN_MULTIPLO [#,%]");
+        gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 1304, "Error Sintactico {}: Falta la asignación [#,%]");
+        gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1305, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("mcm", "MINIMO_COMUN_MULTIPLO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1306, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
         // Definición de grupos de operaciones
         gramatica.group("operaciones_avanzadas", "potencia | raiz_cua | raiz_ene | loga_nat | log_b10 | exponencial | val_abso | facto | redondeo | redon_abajo | mcd | mcm");
+        
         gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | COSENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | TANGENTE PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("operaciones_trigonometricas", "SENO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1401, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura en SENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1402, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre en SENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "SENO PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1403, "Error Sintactico {}: Falta el identificador después de SENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1404, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre en SENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1405, "Error Sintactico {}: Falta el identificador después de la asignación en SENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "SENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1406, "Error Sintactico {}: Falta el fin de línea en SENO [#,%]");
+        
+        gramatica.group("operaciones_trigonometricas", "COSENO IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1407, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura en COSENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1408, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre en COSENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1409, "Error Sintactico {}: Falta el identificador después de COSENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1410, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre en COSENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1411, "Error Sintactico {}: Falta el identificador después de la asignación en COSENO [#,%]");
+        gramatica.group("operaciones_trigonometricas", "COSENO PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1412, "Error Sintactico {}: Falta el fin de línea en COSENO [#,%]");
+        
+        gramatica.group("operaciones_trigonometricas", "TANGENTE IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1413, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura en TANGENTE [#,%]");
+        gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 1414, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre en TANGENTE [#,%]");
+        gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1415, "Error Sintactico {}: Falta el identificador después de TANGENTE [#,%]");
+        gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 1416, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre en TANGENTE [#,%]");
+        gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 1417, "Error Sintactico {}: Falta el identificador después de la asignación en TANGENTE [#,%]");
+        gramatica.group("operaciones_trigonometricas", "TANGENTE PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 1418, "Error Sintactico {}: Falta el fin de línea en TANGENTE [#,%]");
+        
         gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
+        gramatica.group("operaciones_basicas", "PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1501, "Error Sintactico {}: Falta colocar la operación básica (SUMA, RESTA, MULTIPLICACION, DIVISION, MODULO) [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1502, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 1503, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1504, "Error Sintactico {}: Falta el identificador después del paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 1505, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1506, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("operaciones_basicas", "(SUMA | RESTA | MULTIPLICACION | DIVISION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1507, "Error Sintactico {}: Falta el fin de línea [#,%]");
+        
         gramatica.group("operaciones_estadisticas", "MEDIANA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | VAR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | DESVESTA PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA | PROMEDIO PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("operaciones", "(operaciones_basicas | operaciones_avanzadas | operaciones_trigonometricas | operaciones_comparacion | operaciones_estadisticas)*");
+        gramatica.group("operaciones_estadisticas", "PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1601, "Error Sintactico {}: Falta colocar la operación estadística (MEDIANA, VAR, DESVESTA, PROMEDIO) [#,%]");
+        gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1602, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ ASIGNACION IDENTIFICADOR FINLINEA", 1603, "Error Sintactico {}: Falta el paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1604, "Error Sintactico {}: Falta el identificador después del paréntesis cuadrado de apertura [#,%]");
+        gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC IDENTIFICADOR FINLINEA", 1605, "Error Sintactico {}: Falta la asignación después del paréntesis cuadrado de cierre [#,%]");
+        gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1606, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
+        gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1607, "Error Sintactico {}: Falta el fin de línea [#,%]");
 
+        gramatica.group("operaciones", "(operaciones_basicas | operaciones_avanzadas | operaciones_trigonometricas | operaciones_comparacion | operaciones_estadisticas)*");
+        
         // Definición de estructuras de control
         gramatica.loopForFunExecUntilChangeNotDetected(() -> {
             gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC");

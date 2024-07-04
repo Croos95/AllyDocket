@@ -39,8 +39,7 @@ import javax.swing.table.DefaultTableModel;
  * @author Allydocket
  */
 public class Compilador extends javax.swing.JFrame {
-
-    private String title;
+ private String title;
     private Directory directorio;
     private ArrayList<Token> tokens;
     private ArrayList<ErrorLSSL> errors;
@@ -51,17 +50,14 @@ public class Compilador extends javax.swing.JFrame {
     private ArrayList<Production> compProd;
     private ArrayList<Production> asigProd;
     private ArrayList<Production> asigProdConID;
-    private ArrayList<Production> compaProdIzq;
-    private ArrayList<Production> compaProdDer;
-    private ArrayList<Production> compaProdDoble;
-    private ArrayList<Production> operProdIzq;
-    private ArrayList<Production> operProdDer;
-    private ArrayList<Production> operProdDoble;
-
+    private ArrayList<Production> opProd;
+    private ArrayList<Token> tokensTemp;
     private HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
     private HashMap<String, String> tablaSimbolos;
     Grammar gramatica;
+
+
 
     /**
      * Creates new form Compilador
@@ -102,7 +98,7 @@ public class Compilador extends javax.swing.JFrame {
         Functions.insertAsteriskInName(this, jtpCode, () -> {
             timerKeyReleased.restart();
         });
-        tokens = new ArrayList<>();
+         tokens = new ArrayList<>();
         errors = new ArrayList<>();
         textsColor = new ArrayList<>();
         identProd = new ArrayList<>();
@@ -111,12 +107,9 @@ public class Compilador extends javax.swing.JFrame {
         tablaSimbolos = new HashMap<>();
         asigProd = new ArrayList<>();
         asigProdConID = new ArrayList<>();
-        compaProdIzq = new ArrayList<>();
-        compaProdDer = new ArrayList<>();
-        compaProdDoble = new ArrayList<>();
-        operProdIzq = new ArrayList<>();
-        operProdDer = new ArrayList<>();
-        operProdDoble = new ArrayList<>();
+        compProd = new ArrayList<>();
+        opProd = new ArrayList<>();
+
 
         Functions.setAutocompleterJTextComponent(new String[]{"VAR { \n  \n }"}, jtpCode, () -> {
             timerKeyReleased.restart();
@@ -721,10 +714,10 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 105, "Falta colocar la asignacion --> '='  [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION FINLINEA", 106, "Falta colocar el valor a asignar [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION (CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO)", 107, "Falta colocar el fin de linea --> ; [#,%]");
-        // Definicion de asignacion
+         // Definicion de asignacion
         gramatica.group("asignacion", "IDENTIFICADOR ASIGNACION (BOOLEANO | TEXTO | DECIMAL | ENTERO) FINLINEA", asigProdConID);
         gramatica.group("asignacion", "IDENTIFICADOR ASIGNACION (IDENTIFICADOR|CADENA |NDECIMAL|NUMERO|FALSO|VERDADERO) FINLINEA", asigProd);
-        // Definición de comparaciones
+        // Definición de comparaciones        Este es [0]                                           Este es [1]                                                                             Este es [2]
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", compProd);
         gramatica.group("comparacion", "(IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", 100, "Falta colocar el primer valor [#,%]");
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IDENTIFICADOR | NUMERO)", 101, "Falta colocar la operacion de comparacion [#,%]");
@@ -872,7 +865,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1606, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1607, "Error Sintactico {}: Falta el fin de línea [#,%]");
 
-        gramatica.group("operaciones", "(operaciones_basicas | operaciones_avanzadas | operaciones_trigonometricas | operaciones_comparacion | operaciones_estadisticas)*");
+         gramatica.group("operaciones", "(operaciones_basicas | operaciones_avanzadas | operaciones_trigonometricas | operaciones_comparacion | operaciones_estadisticas)*", opProd);
         
         // Definición de estructuras de control
         gramatica.loopForFunExecUntilChangeNotDetected(() -> {
@@ -952,11 +945,11 @@ public class Compilador extends javax.swing.JFrame {
             } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
                 errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
             } else if (tipoDato.equals("TEXTO") && !valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
-                errors.add(new ErrorLSSL(3, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
+                errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
             } else if (tipoDato.equals("DECIMAL") && !valorAsignado.matches("[+-]?([0-9]*[.])?[0-9]+([eE][+-]?[0-9]+)?")) {
-                errors.add(new ErrorLSSL(4, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
+                errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
             } else if (tipoDato.equals("BOOLEANO") && !valorAsignado.matches("verdadero|falso")) {
-                errors.add(new ErrorLSSL(5, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
+                errors.add(new ErrorLSSL(2, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
             } else {
                 // Verificar si la variable ya está en el conjunto de identificadores
                 String variable = id.lexemeRank(1); //Almacenar variable temporal con el lexema osease el identificador como tal Ejemplo #C3
@@ -964,12 +957,12 @@ public class Compilador extends javax.swing.JFrame {
                 {
                     //Si encuentra duplicados emite el error y lo almacena tambien
                     System.out.println("Error: Variable duplicada = " + variable);
-                    errors.add(new ErrorLSSL(7, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable, id, false));
+                    errors.add(new ErrorLSSL(3, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable, id, false));
                 } else {
                     //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
-                    identificadores.put(id.lexemeRank(1), valorAsignado);
-                    //LLAVE       VALOR
-                    tablaSimbolos.put(id.lexemeRank(1), valorAsignado);
+                    identificadores.put(id.lexemeRank(1), tipoDato);
+                                            //LLAVE       VALOR
+                    tablaSimbolos.put(id.lexemeRank(1), tipoDato);
                     tablaS.addRow(new Object[]{id.lexemeRank(1), tipoEsperado, valorAsignado});//tambien se mandan a la tabla en la GUI
                     System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
                 }
@@ -986,14 +979,46 @@ public class Compilador extends javax.swing.JFrame {
                     String lexema = token.getLexeme();
                     if (!tablaSimbolos.containsKey(lexema)) {
                         System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + token.getLexeme());
-                        errors.add(new ErrorLSSL(6, "Error semántico {}: este identificador no está declarado [#,%] = " + token.getLexeme(), token));
-                    } else {
-                        System.out.println("todo bien------------");
+                        errors.add(new ErrorLSSL(4, "Error semántico {}: este identificador no está declarado [#,%] = " + token.getLexeme(), token));
                     }
                 }//if
             }//for
         }//if
 // Error de variable siendo usada sin declararse------------------------------------------------------------------------------
+
+//comparacion de tipos Incompatibles-------------------------------------------------------------------------------
+        if (!compProd.isEmpty()) {
+            // Recorrer la producción de comparacion 
+            for (Production comp : compProd) {
+                //EJEMPLO ILUSTRATIVO ---> #id1 == #id2
+                String comparador1 = comp.lexemeRank(0);//#id1
+                String comparador2 = comp.lexemeRank(2);//#id2
+                // si  #id1 --> tipo de dato  != #id2 --> tipo de dato
+                if (!tablaSimbolos.get(comparador1).equals(tablaSimbolos.get(comparador2))) {
+                    errors.add(new ErrorLSSL(5, "Error semántico {}: comparacion de tipos Incompatibles [#,%] = " + tablaSimbolos.get(comparador1) + " y " + tablaSimbolos.get(comparador2), comp, false));
+                }//If
+            }//For
+        }//If
+//comparacion de tipos Incompatibles-------------------------------------------------------------------------------
+      
+//Operacion de tipos Incompatibles----------------------------------------------------------------------------------
+ if (!opProd.isEmpty()) {
+    // Recorrer la producción de operaciones
+    for (int i = 0; i < opProd.size(); i++) {
+         tokensTemp = opProd.get(i).getTokens();
+        for (Token temp : tokensTemp) {
+            String lexema = temp.getLexeme();
+            if ("IDENTIFICADOR".equals(temp.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
+                String tipo = tablaSimbolos.get(lexema);
+                if (!"ENTERO".equals(tipo) || "DECIMAL".equals(tipo)) {
+                    errors.add(new ErrorLSSL(5, "Error semántico {}: Operación de tipos incompatibles [#,%]", temp));
+                }//if
+            }//if 
+        }//for
+    }//for
+}//if
+//Operacion de tipos Incompatibles----------------------------------------------------------------------------------
+//
     }//metodo semantico
 
     private void fillTableTokens() {
@@ -1003,9 +1028,10 @@ public class Compilador extends javax.swing.JFrame {
         });
     }
 
-    private void printConsole() {
-        int sizeErrors = errors.size();
-        if (sizeErrors > 0) {
+     private void printConsole() {
+
+        if (!errors.isEmpty()) {
+            System.out.println("AUN HAY ERRORRES");
             Functions.sortErrorsByLineAndColumn(errors);
             String strErrors = "\n";
             for (ErrorLSSL error : errors) {
@@ -1014,23 +1040,30 @@ public class Compilador extends javax.swing.JFrame {
             }
             jtaOutputConsole.append("Compilación terminada...\n" + strErrors + "\nLa compilación terminó con errores...");
         } else {
-            jtaOutputConsole.append("Compilación terminada...");
+            clearFields();
+            jtaOutputConsole.setText("Compilación terminada...");
         }
         jtaOutputConsole.setCaretPosition(0);
     }
 
     private void clearFields() {
+        errors.clear();
         Functions.clearDataInTable(tblTokens);
         Functions.clearDataInTable(TblSimbolos);
         jtaOutputConsole.setText("");
         tokens.clear();
-        errors.clear();
         identProd.clear();
         identificadores.clear();
         mainProd.clear();
+        asigProd.clear();
+        asigProdConID.clear();
+        opProd.clear();
+        compProd.clear();
         tablaSimbolos.clear();
         codeHasBeenCompiled = false;
+        
     }
+
 
     /**
      * @param args the command line arguments

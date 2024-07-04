@@ -1032,7 +1032,17 @@ public class Compilador extends javax.swing.JFrame {
                 } //ERROR AL DIVIDIR ENTRE 0-------------------------------------
                 else {
                     //Operacion de tipos Incompatibles----------------------------------------------------------------------------------
-                    errors.add(new ErrorLSSL(7, "Error semántico {}: comparacion de tipos Incompatibles [#,%]", opProd.get(i), false));
+                    tokensTemp = opProd.get(i).getTokens();
+                    for (Token temp : tokensTemp) {
+                        String lexema = temp.getLexeme();
+                        if ("IDENTIFICADOR".equals(temp.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
+                            String tipo[] = tablaSimbolos.get(lexema);
+                            if (!"ENTERO".equals(tipo[0]) && "DECIMAL".equals(tipo[0])) {
+                                errors.add(new ErrorLSSL(5, "Error semántico {}: Operación de tipos incompatibles [#,%]", temp));
+                            }//if
+                        }//if 
+                    }//for
+
                     //Operacion de tipos Incompatibles----------------------------------------------------------------------------------
                 }
             }//for

@@ -1069,7 +1069,6 @@ public class Compilador extends javax.swing.JFrame {
     }
 
     private void printConsole() {
-
         if (!errors.isEmpty()) {
             System.out.println("AUN HAY ERRORRES");
             Functions.sortErrorsByLineAndColumn(errors);
@@ -1080,7 +1079,6 @@ public class Compilador extends javax.swing.JFrame {
             }
             jtaOutputConsole.append("Compilación terminada...\n" + strErrors + "\nLa compilación terminó con errores...");
         } else {
-            clearFields();
             jtaOutputConsole.setText("Compilación terminada...");
         }
         jtaOutputConsole.setCaretPosition(0);

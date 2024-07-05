@@ -54,6 +54,7 @@ public class Compilador extends javax.swing.JFrame {
     private ArrayList<Production> opProd;
     private ArrayList<Token> tokensTemp;
     private ArrayList<Production> diviProd;
+    private ArrayList<Production> mientrasProd;
     private HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
     private HashMap<String, String[]> tablaSimbolos;
@@ -111,6 +112,7 @@ public class Compilador extends javax.swing.JFrame {
         compProd = new ArrayList<>();
         opProd = new ArrayList<>();
         diviProd = new ArrayList<>();
+        mientrasProd = new ArrayList<>();
         tablaS = (DefaultTableModel) TblSimbolos.getModel();
         Functions.setAutocompleterJTextComponent(new String[]{"VAR { \n  \n }"}, jtpCode, () -> {
             timerKeyReleased.restart();
@@ -883,7 +885,8 @@ public class Compilador extends javax.swing.JFrame {
 
         // Estructura MIENTRAS
         gramatica.loopForFunExecUntilChangeNotDetected(() -> {
-            gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC");
+            //0        1        2         3     4                           5                            6
+            gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC", mientrasProd);
         });
         // Estructura MIENTRAS
         gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC", 424, "Error Sintactico {}: Falta el paréntesis de apertura [#,%]");
@@ -979,75 +982,170 @@ public class Compilador extends javax.swing.JFrame {
             }//for
         }//if
 // Error de variable siendo usada sin declararse------------------------------------------------------------------------------
-
-//comparacion de tipos Incompatibles-------------------------------------------------------------------------------
-        if (!compProd.isEmpty()) {
-            // Recorrer la producción de comparacion 
-            for (Production comp : compProd) {
-                //EJEMPLO ILUSTRATIVO ---> #id1 == #id2
-                String comparador1 = comp.lexemeRank(0);//#id1
-                String comparador2 = comp.lexemeRank(2);//#id2
-                // si  #id1 --> tipo de dato  != #id2 --> tipo de dato
-                if (!identificadores.get(comparador1).equals(identificadores.get(comparador2))) {
-                    errors.add(new ErrorLSSL(5, "Error semántico {}: comparacion de tipos Incompatibles [#,%] = [" + identificadores.get(comparador1) + "] y [" + identificadores.get(comparador2) + "]", comp, false));
-                }//If
-                else {
-                    //aqui va la salida en consola
-                }
-            }//For
-        }//If
-//comparacion de tipos Incompatibles-------------------------------------------------------------------------------
-
+ // Comparacion de tipos Incompatibles-------------------------------------------------------------------------------
         if (!opProd.isEmpty()) {
             // Recorrer la producción de operaciones
             for (int i = 0; i < opProd.size(); i++) {
-                //ERROR AL DIVIDIR ENTRE 0-------------------------------------
-                //Comprobar que la operacion es una division
-                if (opProd.get(i).lexemeRank(0).equals("DIVISION")) {
-                    //Segregar la produccion para eliminar el identificador donde se asigna la operacion y dejar los operadores
-                    String divisor = opProd.get(i).lexemeRank(2);
-                    String dividendo = opProd.get(i).lexemeRank(4);
-                    //Encontrar el identificador, y determinar si es diferente que 0
+                Production currentOp = opProd.get(i);
+
+                // Comprobar que la operación es una división
+                if ("DIVISION".equals(currentOp.lexemeRank(0))) {
+                    // Segregar la producción para eliminar el identificador donde se asigna la operación y dejar los operadores
+                    String divisor = currentOp.lexemeRank(2);
+                    String dividendo = currentOp.lexemeRank(4);
+
+                    // Encontrar el identificador, y determinar si es diferente que 0
                     String[] dividendoD = tablaSimbolos.get(dividendo);
                     String[] divisorD = tablaSimbolos.get(divisor);
-                    if (dividendoD[1].equals("0") || dividendo.equals("0")) {
-                        errors.add(new ErrorLSSL(6, "Error semántico {}: No se puede dividir entre 0 [#,%]", opProd.get(i), false));
+
+                    if (dividendoD == null || divisorD == null) {
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                        continue;
+                    }
+
+                    if ("0".equals(dividendoD[1]) || "0".equals(dividendo)) {
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
                     } else {
-                        if (dividendoD[0].equals("ENTERO") && divisorD[0].equals("ENTERO")) {
-                            int operacion = Integer.parseInt(divisorD[1]) / Integer.parseInt(dividendoD[1]);
-                            String[] datosActu = {"ENTERO", String.valueOf(operacion)};
-                            tablaSimbolos.put(opProd.get(i).lexemeRank(7), datosActu);
-                            // Actualizar JTable con los valores actualizados
-                            actualizarJTable(opProd.get(i).lexemeRank(7), datosActu);
-                        } else if (dividendoD[0].equals("DECIMAL") && divisorD[0].equals("DECIMAL")) {
-                            float operacion = Float.parseFloat(divisorD[1]) / Float.parseFloat(dividendoD[1]);
-                            String[] datosActu = {"DECIMAL", String.valueOf(operacion)};
-                            tablaSimbolos.put(opProd.get(i).lexemeRank(7), datosActu);
-                            // Actualizar JTable con los valores actualizados
-                            actualizarJTable(opProd.get(i).lexemeRank(7), datosActu);
-                        } else {
-                            errors.add(new ErrorLSSL(7, "Error semántico {}: comparacion de tipos Incompatibles [#,%]", opProd.get(i), false));
+                        try {
+                            if ("ENTERO".equals(dividendoD[0]) && "ENTERO".equals(divisorD[0])) {
+                                int operacion = Integer.parseInt(divisorD[1]) / Integer.parseInt(dividendoD[1]);
+                                String[] datosActu = {"ENTERO", String.valueOf(operacion)};
+                                tablaSimbolos.put(currentOp.lexemeRank(7), datosActu);
+                                actualizarJTable(currentOp.lexemeRank(7), datosActu);
+                            } else if ("DECIMAL".equals(dividendoD[0]) && "DECIMAL".equals(divisorD[0])) {
+                                float operacion = Float.parseFloat(divisorD[1]) / Float.parseFloat(dividendoD[1]);
+                                String[] datosActu = {"DECIMAL", String.valueOf(operacion)};
+                                tablaSimbolos.put(currentOp.lexemeRank(7), datosActu);
+                                actualizarJTable(currentOp.lexemeRank(7), datosActu);
+                            } else {
+                                errors.add(new ErrorLSSL(7, "Error semántico {}: Comparacion de tipos incompatibles [#,%]", currentOp, false));
+                            }
+                        } catch (NumberFormatException e) {
+                            errors.add(new ErrorLSSL(9, "Error semántico {}: Formato de número inválido [#,%]", currentOp, false));
                         }
                     }
-                } //ERROR AL DIVIDIR ENTRE 0-------------------------------------
-                else {
-                    //Operacion de tipos Incompatibles----------------------------------------------------------------------------------
-                    tokensTemp = opProd.get(i).getTokens();
-                    for (Token temp : tokensTemp) {
+                } else {
+                    // Operacion de tipos Incompatibles----------------------------------------------------------------------------------
+                    for (Token temp : currentOp.getTokens()) {
                         String lexema = temp.getLexeme();
                         if ("IDENTIFICADOR".equals(temp.getLexicalComp()) && tablaSimbolos.containsKey(lexema)) {
-                            String tipo[] = tablaSimbolos.get(lexema);
-                            if (!"ENTERO".equals(tipo[0]) && "DECIMAL".equals(tipo[0])) {
+                            String[] tipo = tablaSimbolos.get(lexema);
+                            if (!"ENTERO".equals(tipo[0]) && !"DECIMAL".equals(tipo[0])) {
                                 errors.add(new ErrorLSSL(5, "Error semántico {}: Operación de tipos incompatibles [#,%]", temp));
-                            }//if
-                        }//if 
-                    }//for
-
-                    //Operacion de tipos Incompatibles----------------------------------------------------------------------------------
+                            }
+                        }
+                    }
+                    // Operacion de tipos Incompatibles----------------------------------------------------------------------------------
                 }
-            }//for
-        }//if
-//
+            }
+        }
+//comparacion de tipos Incompatibles-------------------------------------------------------------------------------
+        if (!compProd.isEmpty()) {
+            // Recorrer la producción de comparacion 
+            int i = 0;
+            for (Production comp : compProd) {
+                i++;
+                //EJEMPLO ILUSTRATIVO ---> #id1 == #id2
+                String comparador1 = comp.lexemeRank(0);//#id1
+                String operador = comp.lexemeRank(1);// operador de comparación (==, !=, <, >, <=, >=)
+                String comparador2 = comp.lexemeRank(2);//#id2
+                // Verificar si ambos comparadores están en la tabla de identificadores
+                if (!identificadores.containsKey(comparador1) || !identificadores.containsKey(comparador2)) {
+                    errors.add(new ErrorLSSL(5, "Error semántico {}: uno de los identificadores no está declarado [#,%] = [" + comparador1 + "] o [" + comparador2 + "]", comp, false));
+                    continue; // Saltar esta comparación si uno de los identificadores no está declarado
+                }
+
+                // Obtener los tipos de datos de los comparadores
+                String tipo1 = identificadores.get(comparador1);
+                String tipo2 = identificadores.get(comparador2);
+
+                // si #id1 --> tipo de dato != #id2 --> tipo de dato
+                if (!tipo1.equals(tipo2)) {
+                    errors.add(new ErrorLSSL(5, "Error semántico {}: comparacion de tipos Incompatibles [#,%] = [" + tipo1 + "] y [" + tipo2 + "]", comp, false));
+                } else {
+                    // Obtener los valores reales de los comparadores
+                    String[] valor1 = tablaSimbolos.get(comparador1);
+                    String[] valor2 = tablaSimbolos.get(comparador2);
+                    String valor1Real = valor1[1];
+                    String valor2Real = valor2[1];
+                    String[] valorIF = {"BOOLEANO", "verdadero"};
+                    String[] valorIFalse = {"BOOLEANO", "falso"};
+                    // Condicion No Booleana--------------------------------------------------------------------------------------------------
+                    try {
+                        switch (operador) {
+                            case "==":
+                                if (!valor1Real.equals(valor2Real)) {
+                                    errors.add(new ErrorLSSL(8, "Error semántico {}: los valores no son iguales [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+                                    tablaSimbolos.put(comp.getName() + i, valorIFalse);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                } else {
+                                    tablaSimbolos.put(comp.getName() + i, valorIF);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                }
+                                break;
+                            case "!=":
+                                if (valor1Real.equals(valor2Real)) {
+                                    errors.add(new ErrorLSSL(8, "Error semántico {}: los valores son iguales [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+                                    tablaSimbolos.put(comp.getName() + i, valorIFalse);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                } else {
+                                    tablaSimbolos.put(comp.getName() + i, valorIF);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                }
+                                break;
+                            case "<<":
+                                if (Float.parseFloat(valor1Real) >= Float.parseFloat(valor2Real)) {
+                                    errors.add(new ErrorLSSL(8, "Error semántico {}: el valor no es menor [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+                                    tablaSimbolos.put(comp.getName() + i, valorIFalse);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                } else {
+                                    tablaSimbolos.put(comp.getName() + i, valorIF);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                }
+                                break;
+                            case ">>":
+                                if (Float.parseFloat(valor1Real) <= Float.parseFloat(valor2Real)) {
+                                    errors.add(new ErrorLSSL(8, "Error semántico {}: el valor no es mayor [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+                                    tablaSimbolos.put(comp.getName() + i, valorIFalse);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                } else {
+                                    tablaSimbolos.put(comp.getName() + i, valorIF);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                }
+                                break;
+                            case "<=":
+                                if (Float.parseFloat(valor1Real) > Float.parseFloat(valor2Real)) {
+                                    errors.add(new ErrorLSSL(8, "Error semántico {}: el valor no es menor o igual [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+                                    tablaSimbolos.put(comp.getName() + i, valorIFalse);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                } else {
+                                    tablaSimbolos.put(comp.getName() + i, valorIF);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                }
+                                break;
+                            case ">=":
+                                if (Float.parseFloat(valor1Real) < Float.parseFloat(valor2Real)) {
+                                    errors.add(new ErrorLSSL(8, "Error semántico {}: el valor no es mayor o igual [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+                                    tablaSimbolos.put(comp.getName() + i, valorIFalse);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                } else {
+                                    tablaSimbolos.put(comp.getName() + i, valorIF);
+                                    tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                }
+                                break;
+                            default:
+                                errors.add(new ErrorLSSL(10, "Error semántico {}: operador de comparación no reconocido [#,%] = " + operador, comp, false));
+                                break;
+                        }
+                    } catch (NumberFormatException e) {
+                        errors.add(new ErrorLSSL(9, "Error semántico {}: formato de número inválido [#,%]", comp, false));
+                    }
+                    //Condicion No Booleana--------------------------------------------------------------------------------------------------
+                }
+            }//For
+        }//If
+       
+
     }//metodo semantico
 // Método para actualizar la JTable
 
@@ -1099,6 +1197,7 @@ public class Compilador extends javax.swing.JFrame {
         compProd.clear();
         tablaSimbolos.clear();
         diviProd.clear();
+        mientrasProd.clear();
         codeHasBeenCompiled = false;
     }
 

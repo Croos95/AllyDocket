@@ -1,12 +1,12 @@
 VARIABLES{
   ENTERO #A = 5;
-  ENTERO #B = 0;
+  ENTERO #B = 2;
   ENTERO #C = 5;
   ENTERO #F = 8;
 }
 PROCESOS {
- MULTIPLICACION[#B,#F]=#B;
-  DIVISION [#A ,#C] = #B;
+ MULTIPLICACION[#B,#A]=#B;
+  DIVISION [#A ,#C] = #F;
  	 SI(#A== #B){
 	
 	}

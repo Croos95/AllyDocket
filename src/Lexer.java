@@ -972,7 +972,7 @@ class Lexer {
         case "verdadero": return token(yytext(), "VERDADERO", yyline, yycolumn);
         case "falso": return token(yytext(), "FALSO", yyline, yycolumn);
         case "IMPRIMIR": return token(yytext(), "IMPRIMIR", yyline, yycolumn);
-        case "ASGINAR": return token(yytext(), "ASIGNAR", yyline, yycolumn);
+        case "ASIGNAR": return token(yytext(), "ASIGNAR", yyline, yycolumn);
     }
             }
             // fall through

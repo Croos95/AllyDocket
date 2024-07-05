@@ -716,7 +716,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ( CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO) FINLINEA", 105, "Falta colocar la asignacion --> '='  [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION FINLINEA", 106, "Falta colocar el valor a asignar [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION (CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO)", 107, "Falta colocar el fin de linea --> ; [#,%]");
-        
+
         gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("asignar", "ASIGNAR IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 300, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
         gramatica.group("asignar", "ASIGNAR PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 301, "Error Sintactico {}: Falta identificador que brindara el valor [#,%]");
@@ -729,7 +729,6 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("imprimir", "IMPRIMIR IDENTIFICADOR (SEPARADOR IDENTIFICADOR)* PARCUAC", 306, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
         gramatica.group("imprimir", "IMPRIMIR PARCUAA PARCUAC", 307, "Error Sintactico {}: Falta el identificador a imprimir [#,%]");
         gramatica.group("imprimir", "IMPRIMIR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)* PARCUAC", 308, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
-
 
         // Definición de comparaciones        Este es [0]                                           Este es [1]                                                                             Este es [2]
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", compProd);
@@ -879,7 +878,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION FINLINEA", 1606, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("operaciones_estadisticas", "(MEDIANA | VAR | DESVESTA | PROMEDIO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)+ PARCUAC ASIGNACION IDENTIFICADOR", 1607, "Error Sintactico {}: Falta el fin de línea [#,%]");
 
-        gramatica.group("operaciones", "(operaciones_basicas | operaciones_avanzadas | operaciones_trigonometricas | operaciones_comparacion | operaciones_estadisticas | asignar | imprimir)*",opProd);
+        gramatica.group("operaciones", "(operaciones_basicas | operaciones_avanzadas | operaciones_trigonometricas | operaciones_comparacion | operaciones_estadisticas | asignar | imprimir)*", opProd);
 
         // Definición de estructuras de control
         gramatica.loopForFunExecUntilChangeNotDetected(() -> {
@@ -994,54 +993,70 @@ public class Compilador extends javax.swing.JFrame {
         // Error de variable siendo usada sin declararse------------------------------------------------------------------------------
 
         if (!opProd.isEmpty()) {
-            for (int i = 0; i < opProd.size(); i++) {
-                Production currentOp = opProd.get(i);
-                switch (currentOp.lexemeRank(0)) {
-                    case "DIVISION":
-                        String divisor = currentOp.lexemeRank(2);
-                        String dividendo = currentOp.lexemeRank(4);
-                        String[] dividendoD = tablaSimbolos.get(dividendo);
-                        String[] divisorD = tablaSimbolos.get(divisor);
-                        if (dividendoD == null || divisorD == null) {
-                            errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-                            continue;
-                        }
-                        if ("0".equals(dividendoD[1]) || "0".equals(dividendo)) {
-                            errors.add(new ErrorLSSL(6, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
-                            continue;
-                        }
-                        verificarTiposYRealizarDivision(currentOp, dividendoD, divisorD);
-                        break;
-                    case "MULTIPLICACION":
-                        int multiplicacion = 1;
-                        for (int j = 2; j < currentOp.getSizeTokens() - 2; j++) { // asumiendo que los factores están después del primer lexema
-                            if (currentOp.lexicalCompRank(j).equals("IDENTIFICADOR")) {
-                                String[] datos = tablaSimbolos.get(currentOp.lexemeRank(j));
-                                if (datos == null) {
-                                    errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-                                    break;
-                                }
-                                try {
+        for (int i = 0; i < opProd.size(); i++) {
+            Production currentOp = opProd.get(i);
+            switch (currentOp.lexemeRank(0)) {
+                case "DIVISION":
+                    String divisor = currentOp.lexemeRank(2);
+                    String dividendo = currentOp.lexemeRank(4);
+                    String[] dividendoD = tablaSimbolos.get(dividendo);
+                    String[] divisorD = tablaSimbolos.get(divisor);
+                    if (dividendoD == null || divisorD == null) {
+                        errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                        continue;
+                    }
+                    if ("0".equals(dividendoD[1]) || "0".equals(dividendo)) {
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
+                        continue;
+                    }
+                    verificarTiposYRealizarDivision(currentOp, dividendoD, divisorD);
+                    break;
+                case "MULTIPLICACION":
+                    boolean esDecimal = false;
+                    double multiplicacion = 1.0;
+                    int j = 0;
+                    while (!currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
+                        if (currentOp.lexicalCompRank(j).equals("IDENTIFICADOR")) {
+                            String[] datos = tablaSimbolos.get(currentOp.lexemeRank(j));
+                            if (datos == null) {
+                                errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                                break;
+                            }
+                            try {
+                                if (datos[0].equals("DECIMAL")) {
+                                    esDecimal = true;
+                                    multiplicacion *= Double.parseDouble(datos[1]);
+                                } else if (datos[0].equals("ENTERO")) {
                                     multiplicacion *= Integer.parseInt(datos[1]);
-                                } catch (NumberFormatException e) {
+                                } else {
                                     errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la multiplicación [#,%]", currentOp, false));
                                     break;
                                 }
+                            } catch (NumberFormatException e) {
+                                errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la multiplicación [#,%]", currentOp, false));
+                                break;
                             }
-                        }//FOR MULTIPLICACION
-                        String[] valores={"ENTERO",String.valueOf(multiplicacion)};
-                        tablaSimbolos.put(currentOp.getName()+i,valores);
-                        tablaS.addRow(new Object[]{currentOp.getName()+i, valores[0], valores[1]});
-                        break;
-                    case "SUMA":
-                        // Lógica para SUMA
-                        break;
-                    case "RESTA":
-                        // Lógica para RESTA
-                        break;
-                }
+                        }
+                        j++;
+                    }
+                    String[] valores;
+                    if (esDecimal) {
+                        valores = new String[]{"DECIMAL", String.valueOf(multiplicacion)};
+                    } else {
+                        valores = new String[]{"ENTERO", String.valueOf((int) multiplicacion)};
+                    }
+                    tablaSimbolos.put(currentOp.lexemeRank(j + 1), valores);
+                    actualizarJTable(currentOp.lexemeRank(j + 1), valores);
+                    break;
+                case "SUMA":
+                    // Lógica para SUMA
+                    break;
+                case "RESTA":
+                    // Lógica para RESTA
+                    break;
             }
         }
+    }
 //comparacion de tipos Incompatibles-------------------------------------------------------------------------------
         if (!compProd.isEmpty()) {
             // Recorrer la producción de comparacion 
@@ -1168,10 +1183,6 @@ public class Compilador extends javax.swing.JFrame {
         } catch (NumberFormatException e) {
             errors.add(new ErrorLSSL(9, "Error semántico {}: Formato de número inválido [#,%]", currentOp, false));
         }
-    }
-
-    private void realizarMultiplicacion() {
-
     }
 
 // Método para actualizar la JTable

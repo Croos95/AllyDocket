@@ -717,18 +717,18 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION FINLINEA", 106, "Falta colocar el valor a asignar [#,%]");
         gramatica.group("variable", "(BOOLEANO | TEXTO | DECIMAL | ENTERO) IDENTIFICADOR ASIGNACION (CADENA | NUMERO|NDECIMAL|FALSO|VERDADERO)", 107, "Falta colocar el fin de linea --> ; [#,%]");
 
-        gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
-        gramatica.group("asignar", "ASIGNAR IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 300, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
-        gramatica.group("asignar", "ASIGNAR PARCUAA PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 301, "Error Sintactico {}: Falta identificador que brindara el valor [#,%]");
-        gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR ASIGNACION IDENTIFICADOR FINLINEA", 302, "Error Sintactico {}: Falta parentesis cuadrado de cierre [#,%]");
-        gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC IDENTIFICADOR FINLINEA", 303, "Error Sintactico {}: Falta signo de asignacion -> = [#,%]");
+        gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION (IDENTIFICADOR|VERDADERO|FALSO) FINLINEA");
+        gramatica.group("asignar", "ASIGNAR IDENTIFICADOR PARCUAC ASIGNACION (IDENTIFICADOR|VERDADERO|FALSO)  FINLINEA", 300, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
+        gramatica.group("asignar", "ASIGNAR PARCUAA PARCUAC ASIGNACION (IDENTIFICADOR|VERDADERO|FALSO)  FINLINEA", 301, "Error Sintactico {}: Falta identificador que brindara el valor [#,%]");
+        gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR ASIGNACION (IDENTIFICADOR|VERDADERO|FALSO)  FINLINEA", 302, "Error Sintactico {}: Falta parentesis cuadrado de cierre [#,%]");
+        gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC (IDENTIFICADOR|VERDADERO|FALSO)  FINLINEA", 303, "Error Sintactico {}: Falta signo de asignacion -> = [#,%]");
         gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 304, "Error Sintactico {}: Falta identificador donde se almacenara el valor [#,%]");
-        gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 305, "Error Sintactico {}: Error Sintactico {}: Falta el fin de línea [#,%]");
-
-        gramatica.group("imprimir", "IMPRIMIR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)* PARCUAC");
-        gramatica.group("imprimir", "IMPRIMIR IDENTIFICADOR (SEPARADOR IDENTIFICADOR)* PARCUAC", 306, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
+        gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION (IDENTIFICADOR|VERDADERO|FALSO) ", 305, "Error Sintactico {}: Error Sintactico {}: Falta el fin de línea [#,%]");
+        
+        gramatica.group("imprimir", "IMPRIMIR PARCUAA  (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC");
+        gramatica.group("imprimir", "IMPRIMIR IDENTIFICADOR (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC", 306, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
         gramatica.group("imprimir", "IMPRIMIR PARCUAA PARCUAC", 307, "Error Sintactico {}: Falta el identificador a imprimir [#,%]");
-        gramatica.group("imprimir", "IMPRIMIR PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR)* PARCUAC", 308, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
+        gramatica.group("imprimir", "IMPRIMIR PARCUAA IDENTIFICADOR (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC", 308, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
 
         // Definición de comparaciones        Este es [0]                                           Este es [1]                                                                             Este es [2]
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", compProd);
@@ -882,32 +882,32 @@ public class Compilador extends javax.swing.JFrame {
 
         // Definición de estructuras de control
         gramatica.loopForFunExecUntilChangeNotDetected(() -> {
-            gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras|imprimir)* CORC");
+            gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC");
         });
 
         // Estructura SI
-        gramatica.group("estructura_si", "SI (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", 414, "Error Sintactico {}: Falta el paréntesis de apertura [#,%]");
-        gramatica.group("estructura_si", "SI PARA (comparacion)? CORA (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", 415, "Error Sintactico {}: Falta el paréntesis de cierre [#,%]");
-        gramatica.group("estructura_si", "SI PARA (comparacion)? PARC (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", 416, "Error Sintactico {}: Falta la llave de apertura [#,%]");
+        gramatica.group("estructura_si", "SI (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC ", 414, "Error Sintactico {}: Falta el paréntesis de apertura [#,%]");
+        gramatica.group("estructura_si", "SI PARA (comparacion)? CORA (operaciones | estructura_si | estructura_mientras)* CORC", 415, "Error Sintactico {}: Falta el paréntesis de cierre [#,%]");
+        gramatica.group("estructura_si", "SI PARA (comparacion)? PARC (operaciones | estructura_si | estructura_mientras)* CORC", 416, "Error Sintactico {}: Falta la llave de apertura [#,%]");
         gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)*", 417, "Error Sintactico {}: Falta la llave de cierre [#,%]");
-        gramatica.group("estructura_si", "SI PARA PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC", 418, "Error Sintactico {}: Falta la operación de comparación [#,%]");
-        gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA CORC", 418, "Error Sintactico {}: Falta las operaciones [#,%]");
+        gramatica.group("estructura_si", "SI PARA PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC  ", 418, "Error Sintactico {}: Falta la operación de comparación [#,%]");
+        gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA CORC  ", 418, "Error Sintactico {}: Falta las operaciones [#,%]");
 
         // Estructura MIENTRAS
         gramatica.loopForFunExecUntilChangeNotDetected(() -> {
             //0        1        2         3     4                           5                            6
-            gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", mientrasProd);
+            gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC", mientrasProd);
         });
         // Estructura MIENTRAS
-        gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", 424, "Error Sintactico {}: Falta el paréntesis de apertura [#,%]");
-        gramatica.group("estructura_mientras", "MIENTRAS (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", 425, "Error Sintactico {}: Falta el paréntesis de cierre [#,%]");
-        gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? CORA (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", 426, "Error Sintactico {}: Falta la llave de apertura [#,%]");
-        gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", 427, "Error Sintactico {}: Falta la llave de cierre [#,%]");
+        gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC", 424, "Error Sintactico {}: Falta el paréntesis de apertura [#,%]");
+        gramatica.group("estructura_mientras", "MIENTRAS (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC", 425, "Error Sintactico {}: Falta el paréntesis de cierre [#,%]");
+        gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? CORA (operaciones | estructura_si | estructura_mientras)* CORC", 426, "Error Sintactico {}: Falta la llave de apertura [#,%]");
+        gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC (operaciones | estructura_si | estructura_mientras)* CORC", 427, "Error Sintactico {}: Falta la llave de cierre [#,%]");
         gramatica.group("estructura_mientras", "MIENTRAS PARA PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC", 428, "Error Sintactico {}: Falta la operación de comparación [#,%]");
         gramatica.group("estructura_mientras", "MIENTRAS PARA (comparacion)? PARC CORA CORC", 429, "Error Sintactico {}: Falta las operaciones [#,%]");
 
         // Bloques de procesos y variables
-        gramatica.group("bloque_procesos", "PROCESOS CORA (operaciones | estructura_si | estructura_mientras|imprimir)* CORC", mainProd);
+        gramatica.group("bloque_procesos", "PROCESOS CORA (operaciones | estructura_si | estructura_mientras)* CORC", mainProd);
         gramatica.group("bloque_procesos", "PROCESOS (operaciones | estructura_si | estructura_mientras)* CORC", 9, "Error Sintactico {}: Falta abrir el corchete inicial bloque procesos[#,%]");
         gramatica.group("bloque_procesos", "PROCESOS CORA (operaciones | estructura_si | estructura_mientras)*", 10, "Error Sintactico {}: Falta cerrar el corchete bloque procesos [#,%]");
 
@@ -916,14 +916,11 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("bloque_variables", "VARIABLES CORA (variable)*", 7, "Error Sintactico {}: Falta cerrar el corchete bloque variables [#,%]");
 
         //Bloque main
-//        gramatica.group("main", "(bloque_variables) (bloque_procesos)");
-//        gramatica.group("main", "(bloque_procesos)", 2, "Error Sintactico {}: Falta abrir el bloque variables [#,%]");
-//        gramatica.group("main", "(bloque_variables)", 3, "Error Sintactico {}: Falta abrir el bloque procesos [#,%]");
-        // jtaOutputConsole.append(gramatica.toString());
+        gramatica.group("main", "(bloque_variables) (bloque_procesos)");
         gramatica.initialLineColumn();
 
-        //dxjtaOutputConsole.append(gramatica.toString());
-        //    gramatica.show();
+//        jtaOutputConsole.append(gramatica.toString());
+//            gramatica.show();
     }
     //Metodo para recorrer el HashMap de la Tabla de Simbolos
 

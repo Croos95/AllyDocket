@@ -119,6 +119,7 @@ MEDIANA = "MEDIANA"
 VARIANZA = "VAR"
 DESVIACION_ESTANDAR = "DESVESTA"
 PROMEDIO = "PROMEDIO"
+ROMPER="ROMPER"
 /*ESTRUCTURAS*/
 SI = "SI"
 REPETIR ="REPETIR"
@@ -128,8 +129,9 @@ falso = "falso"
 /*Salida de texto*/
 IMPRIMIR = "IMPRIMIR"
 ASIGNAR = "ASIGNAR"
+SINO = "SINO"
 /* Definición de la macro para palabras reservadas */
-PalabrasReservadas ={ASIGNAR}|{IMPRIMIR}|{falso}|{verdadero}{MIENTRAS}|{REPETIR}|{SI}|{MENOR_O_IGUAL_QUE}|{MAYOR_O_IGUAL_QUE}|{MENOR_QUE}|{MAYOR_QUE}|{DIFERENTE_DE}|{IGUAL_A}|{VARIABLES}|{PROCESOS}|{SUMA}|{RESTA}|{MULTIPLICACION}|{DIVISION}|{MODULO}|{POTENCIA}|{RAIZ_CUADRADA}|{RAIZ_ENESIMA}|{LOGARITMO_NATURAL}|{LOGARITMO_BASE_10}|{EXPONENCIAL}|{SENO}|{COSENO}|{TANGENTE}|{ARCOSENO}|{ARCOCOSENO}|{ARCOTANGENTE}|{SENO_HIPERBOLICO}|{COSENO_HIPERBOLICO}|{TANGENTE_HIPERBOLICA}|{VALOR_ABSOLUTO}|{FACTORIAL}|{REDONDEO}|{REDONDEO_HACIA_ABAJO}|{REDONDEO_HACIA_ARRIBA}|{MAXIMO_COMUN_DIVISOR}|{MINIMO_COMUN_MULTIPLO}|{MEDIANA}|{VARIANZA}|{DESVIACION_ESTANDAR}|{PROMEDIO}
+PalabrasReservadas ={ROMPER}|{SINO}|{ASIGNAR}|{IMPRIMIR}|{falso}|{verdadero}|{MIENTRAS}|{REPETIR}|{SI}|{MENOR_O_IGUAL_QUE}|{MAYOR_O_IGUAL_QUE}|{MENOR_QUE}|{MAYOR_QUE}|{DIFERENTE_DE}|{IGUAL_A}|{VARIABLES}|{PROCESOS}|{SUMA}|{RESTA}|{MULTIPLICACION}|{DIVISION}|{MODULO}|{POTENCIA}|{RAIZ_CUADRADA}|{RAIZ_ENESIMA}|{LOGARITMO_NATURAL}|{LOGARITMO_BASE_10}|{EXPONENCIAL}|{SENO}|{COSENO}|{TANGENTE}|{ARCOSENO}|{ARCOCOSENO}|{ARCOTANGENTE}|{SENO_HIPERBOLICO}|{COSENO_HIPERBOLICO}|{TANGENTE_HIPERBOLICA}|{VALOR_ABSOLUTO}|{FACTORIAL}|{REDONDEO}|{REDONDEO_HACIA_ABAJO}|{REDONDEO_HACIA_ARRIBA}|{MAXIMO_COMUN_DIVISOR}|{MINIMO_COMUN_MULTIPLO}|{MEDIANA}|{VARIANZA}|{DESVIACION_ESTANDAR}|{PROMEDIO}
 
 %%
 
@@ -224,7 +226,9 @@ PalabrasReservadas ={ASIGNAR}|{IMPRIMIR}|{falso}|{verdadero}{MIENTRAS}|{REPETIR}
         case "verdadero": return token(yytext(), "VERDADERO", yyline, yycolumn);
         case "falso": return token(yytext(), "FALSO", yyline, yycolumn);
         case "IMPRIMIR": return token(yytext(), "IMPRIMIR", yyline, yycolumn);
-        case "ASGINAR": return token(yytext(), "ASIGNAR", yyline, yycolumn);
+        case "ASIGNAR": return token(yytext(), "ASIGNAR", yyline, yycolumn);
+        case "SINO": return token(yytext(), "SINO", yyline, yycolumn);
+        case "ROMPER": return token(yytext(), "ROMPER", yyline, yycolumn);
     }
 }
 
@@ -239,7 +243,7 @@ ENTERO { return token(yytext(), "ENTERO", yyline, yycolumn); }
 BOOLEANO { return token(yytext(), "BOOLEANO", yyline, yycolumn); }
 DECIMAL { return token(yytext(), "DECIMAL", yyline, yycolumn); }
 TEXTO { return token(yytext(), "TEXTO", yyline, yycolumn); }
-{Comilla}({IDENTIFICADOR})*{Comilla} { return token(yytext(), "CADENA", yyline, yycolumn); }
+{Comilla}({IDENTIFICADOR}|{EspacioEnBlanco}|.|,|:|;)*{Comilla} { return token(yytext(), "CADENA", yyline, yycolumn); }
 /* Comentarios o espacios en blanco */
 
 {Comentario}|{EspacioEnBlanco} { /*Ignorar*/ }

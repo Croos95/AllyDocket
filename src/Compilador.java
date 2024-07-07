@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -724,7 +725,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC (IDENTIFICADOR|VERDADERO|FALSO)  FINLINEA", 303, "Error Sintactico {}: Falta signo de asignacion -> = [#,%]");
         gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 304, "Error Sintactico {}: Falta identificador donde se almacenara el valor [#,%]");
         gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION (IDENTIFICADOR|VERDADERO|FALSO) ", 305, "Error Sintactico {}: Error Sintactico {}: Falta el fin de línea [#,%]");
-        
+
         gramatica.group("imprimir", "IMPRIMIR PARCUAA  (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC");
         gramatica.group("imprimir", "IMPRIMIR IDENTIFICADOR (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC", 306, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
         gramatica.group("imprimir", "IMPRIMIR PARCUAA PARCUAC", 307, "Error Sintactico {}: Falta el identificador a imprimir [#,%]");
@@ -925,15 +926,17 @@ public class Compilador extends javax.swing.JFrame {
     //Metodo para recorrer el HashMap de la Tabla de Simbolos
 
     private void semanticAnalysis() {
+        tipoDatoIncompatibleyAsignacion();
+    }//metodo semantico
 
+    private void tipoDatoIncompatibleyAsignacion() {
         HashMap<String, String> identDataType = new HashMap<>();
-// Definición de tipos de datos--------------------------------------------------------------------------------------------------------------
+        // Definición de tipos de datos--------------------------------------------------------------------------------------------------------------
         //llave    //valor
         identDataType.put("BOOLEANO", "BOOLEANO");
         identDataType.put("TEXTO", "TEXTO");
         identDataType.put("DECIMAL", "DECIMAL");
         identDataType.put("ENTERO", "ENTERO");
-        identDataType.put("SUMA", "SUMA");
         // Errores Tipos de datos incompatibles con las variables
         for (Production id : identProd) {
             String tipoDato = id.lexemeRank(0);
@@ -943,7 +946,6 @@ public class Compilador extends javax.swing.JFrame {
             //SI NO ES EL TIPO ESPERADO
             if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
                 errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
-
             } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
                 errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
             } else if (tipoDato.equals("TEXTO") && !valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
@@ -959,7 +961,7 @@ public class Compilador extends javax.swing.JFrame {
                 {
                     //Si encuentra duplicados emite el error y lo almacena tambien
                     System.out.println("Error: Variable duplicada = " + variable);
-                    errors.add(new ErrorLSSL(3, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable, id, false));
+                    errors.add(new ErrorLSSL(3, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable.concat(""), id, false));
                 } else {
                     //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
                     identificadores.put(id.lexemeRank(1), tipoDato);
@@ -969,12 +971,15 @@ public class Compilador extends javax.swing.JFrame {
                     String[] getDatos = tablaSimbolos.get(id.lexemeRank(1));
                     tablaS.addRow(new Object[]{id.lexemeRank(1), getDatos[0], getDatos[1]});//tambien se mandan a la tabla en la GUI
                     System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
+
                 }
             }
         }//for identProd
-// Errores Tipos de datos incompatibles con las variables-------------------------------------------------------------------
+        variableNoDeclarada();
+    }
 
-// Error de variable siendo usada sin declararse------------------------------------------------------------------------------
+    private void variableNoDeclarada() {
+        // Error de variable siendo usada sin declararse------------------------------------------------------------------------------
         if (!mainProd.isEmpty()) {
             // Recorrer la producción principal en búsqueda de una variable
             for (Token token : mainProd.get(0).getTokens()) {
@@ -983,158 +988,225 @@ public class Compilador extends javax.swing.JFrame {
                     if (!tablaSimbolos.containsKey(lexema)) {
                         System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + token.getLexeme());
                         errors.add(new ErrorLSSL(4, "Error semántico {}: este identificador no está declarado [#,%] = " + token.getLexeme(), token));
+                    } else {
+                        divsion0yOperaciones();
+                        tiposIncommpatibles();
                     }
                 }//if
             }//for
         }//if
-        // Error de variable siendo usada sin declararse------------------------------------------------------------------------------
+    }
 
-        if (!opProd.isEmpty()) {
-            for (int i = 0; i < opProd.size(); i++) {
-                Production currentOp = opProd.get(i);
-                switch (currentOp.lexemeRank(0)) {
-                    case "DIVISION":
-                        String divisor = currentOp.lexemeRank(2);
-                        String dividendo = currentOp.lexemeRank(4);
+    private void divsion0yOperaciones() {
+    if (!opProd.isEmpty()) {
+        Production currentOp = opProd.get(0);
+        int j = 0;
+        while (j < currentOp.getSizeTokens()) {
+            Token token = currentOp.getTokens().get(j);
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                    String divisor = null;
+                    List<String> dividendos = new ArrayList<>();
+                    int k = j + 1; // Empezar después de "DIVISION"
+                    
+                    // Encontrar los operandos dinámicamente
+                    while (!currentOp.lexicalCompRank(k).equals("ASIGNACION") && k < currentOp.getSizeTokens()) {
+                        if (currentOp.lexicalCompRank(k).equals("IDENTIFICADOR")) {
+                            if (divisor == null) {
+                                divisor = currentOp.lexemeRank(k);
+                            } else {
+                                dividendos.add(currentOp.lexemeRank(k));
+                            }
+                        }
+                        k++;
+                    }
+
+                    if (divisor == null || dividendos.isEmpty()) {
+                        errors.add(new ErrorLSSL(4, "Error semántico {}: Faltan operandos para la división [#,%]", currentOp, false));
+                        break;
+                    }
+
+                    String[] divisorD = tablaSimbolos.get(divisor);
+                    if (divisorD == null) {
+                        errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador del divisor no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                        break;
+                    }
+
+                    double resultado = Double.parseDouble(divisorD[1]);
+                    boolean esDecimal = "DECIMAL".equals(divisorD[0]);
+
+                    for (String dividendo : dividendos) {
                         String[] dividendoD = tablaSimbolos.get(dividendo);
-                        String[] divisorD = tablaSimbolos.get(divisor);
-                        if (dividendoD == null || divisorD == null) {
-                            errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-                            continue;
+                        if (dividendoD == null) {
+                            errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador del dividendo no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                            break;
                         }
                         if ("0".equals(dividendoD[1]) || "0".equals(dividendo)) {
-                            errors.add(new ErrorLSSL(6, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
-                            continue;
+                            errors.add(new ErrorLSSL(5, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
+                            break;
                         }
-                        verificarTiposYRealizarDivision(currentOp, dividendoD, divisorD);
-                        break;
-                    case "MULTIPLICACION":
-                        boolean esDecimalMultiplicacion = false;
-                        double multiplicacion = 1.0;
-                        int j = 0;
-                        while (!currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
-                            if (currentOp.lexicalCompRank(j).equals("IDENTIFICADOR")) {
-                                String[] datos = tablaSimbolos.get(currentOp.lexemeRank(j));
-                                if (datos == null) {
-                                    errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-                                    break;
-                                }
-                                try {
-                                    if (datos[0].equals("DECIMAL")) {
-                                        esDecimalMultiplicacion = true;
-                                        multiplicacion *= Double.parseDouble(datos[1]);
-                                    } else if (datos[0].equals("ENTERO")) {
-                                        multiplicacion *= Integer.parseInt(datos[1]);
-                                    } else {
-                                        errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la multiplicación [#,%]", currentOp, false));
-                                        break;
-                                    }
-                                } catch (NumberFormatException e) {
+                        try {
+                            if ("ENTERO".equals(dividendoD[0]) && "ENTERO".equals(divisorD[0])) {
+                                resultado /= Integer.parseInt(dividendoD[1]);
+                            } else if ("DECIMAL".equals(dividendoD[0]) && "DECIMAL".equals(divisorD[0])) {
+                                resultado /= Double.parseDouble(dividendoD[1]);
+                                esDecimal = true;
+                            } else {
+                                errors.add(new ErrorLSSL(7, "Error semántico {}: Operacion de tipos incompatibles [#,%]", currentOp, false));
+                                break;
+                            }
+                        } catch (NumberFormatException e) {
+                            errors.add(new ErrorLSSL(9, "Error semántico {}: Formato de número inválido [#,%]", currentOp, false));
+                            break;
+                        }
+                    }
+
+                    String[] datosActu;
+                    if (esDecimal) {
+                        datosActu = new String[]{"DECIMAL", String.valueOf(resultado)};
+                    } else {
+                        datosActu = new String[]{"ENTERO", String.valueOf((int) resultado)};
+                    }
+
+                    tablaSimbolos.put(currentOp.lexemeRank(k + 1), datosActu);
+                    actualizarJTable(currentOp.lexemeRank(k + 1), datosActu);
+                    j = k + 2; // Avanzar el índice más allá de los elementos procesados
+                    break;
+                case "MULTIPLICACION":
+                    boolean esDecimalMultiplicacion = false;
+                    double multiplicacion = 1.0;
+                    int startIndex = j + 2;
+                    while (!currentOp.lexicalCompRank(startIndex).equals("ASIGNACION")) {
+                        if (currentOp.lexicalCompRank(startIndex).equals("IDENTIFICADOR")) {
+                            String[] datos = tablaSimbolos.get(currentOp.lexemeRank(startIndex));
+                            if (datos == null) {
+                                errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                                break;
+                            }
+                            try {
+                                if (datos[0].equals("DECIMAL")) {
+                                    esDecimalMultiplicacion = true;
+                                    multiplicacion *= Double.parseDouble(datos[1]);
+                                } else if (datos[0].equals("ENTERO")) {
+                                    multiplicacion *= Integer.parseInt(datos[1]);
+                                } else {
                                     errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la multiplicación [#,%]", currentOp, false));
                                     break;
                                 }
+                            } catch (NumberFormatException e) {
+                                errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la multiplicación [#,%]", currentOp, false));
+                                break;
                             }
-                            j++;
                         }
-                        String[] valoresMultiplicacion;
-                        if (esDecimalMultiplicacion) {
-                            valoresMultiplicacion = new String[]{"DECIMAL", String.valueOf(multiplicacion)};
-                        } else {
-                            valoresMultiplicacion = new String[]{"ENTERO", String.valueOf((int) multiplicacion)};
-                        }
-                        tablaSimbolos.put(currentOp.lexemeRank(j + 1), valoresMultiplicacion);
-                        actualizarJTable(currentOp.lexemeRank(j + 1), valoresMultiplicacion);
-                        break;
-                    case "SUMA":
-                        boolean esDecimalSuma = false;
-                        double suma = 0.0;
-                        j = 0;
-                        while (!currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
-                            if (currentOp.lexicalCompRank(j).equals("IDENTIFICADOR")) {
-                                String[] datos = tablaSimbolos.get(currentOp.lexemeRank(j));
-                                if (datos == null) {
-                                    errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-                                    break;
-                                }
-                                try {
-                                    if (datos[0].equals("DECIMAL")) {
-                                        esDecimalSuma = true;
-                                        suma += Double.parseDouble(datos[1]);
-                                    } else if (datos[0].equals("ENTERO")) {
-                                        suma += Integer.parseInt(datos[1]);
-                                    } else {
-                                        errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la suma [#,%]", currentOp, false));
-                                        break;
-                                    }
-                                } catch (NumberFormatException e) {
+                        startIndex++;
+                    }
+                    String[] valoresMultiplicacion;
+                    if (esDecimalMultiplicacion) {
+                        valoresMultiplicacion = new String[]{"DECIMAL", String.valueOf(multiplicacion)};
+                    } else {
+                        valoresMultiplicacion = new String[]{"ENTERO", String.valueOf((int) multiplicacion)};
+                    }
+                    tablaSimbolos.put(currentOp.lexemeRank(startIndex + 1), valoresMultiplicacion);
+                    actualizarJTable(currentOp.lexemeRank(startIndex + 1), valoresMultiplicacion);
+                    j = startIndex + 2; // Avanzar el índice más allá de los elementos procesados
+                    break;
+                case "SUMA":
+                    boolean esDecimalSuma = false;
+                    double suma = 0.0;
+                    startIndex = j + 2;
+                    while (!currentOp.lexicalCompRank(startIndex).equals("ASIGNACION")) {
+                        if (currentOp.lexicalCompRank(startIndex).equals("IDENTIFICADOR")) {
+                            String[] datos = tablaSimbolos.get(currentOp.lexemeRank(startIndex));
+                            if (datos == null) {
+                                errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                                break;
+                            }
+                            try {
+                                if (datos[0].equals("DECIMAL")) {
+                                    esDecimalSuma = true;
+                                    suma += Double.parseDouble(datos[1]);
+                                } else if (datos[0].equals("ENTERO")) {
+                                    suma += Integer.parseInt(datos[1]);
+                                } else {
                                     errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la suma [#,%]", currentOp, false));
                                     break;
                                 }
+                            } catch (NumberFormatException e) {
+                                errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la suma [#,%]", currentOp, false));
+                                break;
                             }
-                            j++;
                         }
-                        String[] valoresSuma;
-                        if (esDecimalSuma) {
-                            valoresSuma = new String[]{"DECIMAL", String.valueOf(suma)};
-                        } else {
-                            valoresSuma = new String[]{"ENTERO", String.valueOf((int) suma)};
-                        }
-                        tablaSimbolos.put(currentOp.lexemeRank(j + 1), valoresSuma);
-                        actualizarJTable(currentOp.lexemeRank(j + 1), valoresSuma);
-                        break;
-                    case "RESTA":
-                        boolean esDecimalResta = false;
-                        double resta = 0.0;
-                        boolean primerValor = true;
-                        j = 0;
-                        while (!currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
-                            if (currentOp.lexicalCompRank(j).equals("IDENTIFICADOR")) {
-                                String[] datos = tablaSimbolos.get(currentOp.lexemeRank(j));
-                                if (datos == null) {
-                                    errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-                                    break;
-                                }
-                                try {
-                                    if (datos[0].equals("DECIMAL")) {
-                                        esDecimalResta = true;
-                                        if (primerValor) {
-                                            resta = Double.parseDouble(datos[1]);
-                                            primerValor = false;
-                                        } else {
-                                            resta -= Double.parseDouble(datos[1]);
-                                        }
-                                    } else if (datos[0].equals("ENTERO")) {
-                                        if (primerValor) {
-                                            resta = Integer.parseInt(datos[1]);
-                                            primerValor = false;
-                                        } else {
-                                            resta -= Integer.parseInt(datos[1]);
-                                        }
+                        startIndex++;
+                    }
+                    String[] valoresSuma;
+                    if (esDecimalSuma) {
+                        valoresSuma = new String[]{"DECIMAL", String.valueOf(suma)};
+                    } else {
+                        valoresSuma = new String[]{"ENTERO", String.valueOf((int) suma)};
+                    }
+                    tablaSimbolos.put(currentOp.lexemeRank(startIndex + 1), valoresSuma);
+                    actualizarJTable(currentOp.lexemeRank(startIndex + 1), valoresSuma);
+                    j = startIndex + 2; // Avanzar el índice más allá de los elementos procesados
+                    break;
+                case "RESTA":
+                    boolean esDecimalResta = false;
+                    double resta = 0.0;
+                    boolean primerValor = true;
+                    startIndex = j + 2;
+                    while (!currentOp.lexicalCompRank(startIndex).equals("ASIGNACION")) {
+                        if (currentOp.lexicalCompRank(startIndex).equals("IDENTIFICADOR")) {
+                            String[] datos = tablaSimbolos.get(currentOp.lexemeRank(startIndex));
+                            if (datos == null) {
+                                errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                                break;
+                            }
+                            try {
+                                if (datos[0].equals("DECIMAL")) {
+                                    esDecimalResta = true;
+                                    if (primerValor) {
+                                        resta = Double.parseDouble(datos[1]);
+                                        primerValor = false;
                                     } else {
-                                        errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la resta [#,%]", currentOp, false));
-                                        break;
+                                        resta -= Double.parseDouble(datos[1]);
                                     }
-                                } catch (NumberFormatException e) {
+                                } else if (datos[0].equals("ENTERO")) {
+                                    if (primerValor) {
+                                        resta = Integer.parseInt(datos[1]);
+                                        primerValor = false;
+                                    } else {
+                                        resta -= Integer.parseInt(datos[1]);
+                                    }
+                                } else {
                                     errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la resta [#,%]", currentOp, false));
                                     break;
                                 }
+                            } catch (NumberFormatException e) {
+                                errors.add(new ErrorLSSL(7, "Error semántico {}: Tipo de dato no compatible con la resta [#,%]", currentOp, false));
+                                break;
                             }
-                            j++;
                         }
-                        String[] valoresResta;
-                        if (esDecimalResta) {
-                            valoresResta = new String[]{"DECIMAL", String.valueOf(resta)};
-                        } else {
-                            valoresResta = new String[]{"ENTERO", String.valueOf((int) resta)};
-                        }
-                        tablaSimbolos.put(currentOp.lexemeRank(j + 1), valoresResta);
-                        actualizarJTable(currentOp.lexemeRank(j + 1), valoresResta);
-                        break;
-                }
-
+                        startIndex++;
+                    }
+                    String[] valoresResta;
+                    if (esDecimalResta) {
+                        valoresResta = new String[]{"DECIMAL", String.valueOf(resta)};
+                    } else {
+                        valoresResta = new String[]{"ENTERO", String.valueOf((int) resta)};
+                    }
+                    tablaSimbolos.put(currentOp.lexemeRank(startIndex + 1), valoresResta);
+                    actualizarJTable(currentOp.lexemeRank(startIndex + 1), valoresResta);
+                    j = startIndex + 2; // Avanzar el índice más allá de los elementos procesados
+                    break;
+                default:
+                    j++;
+                    break;
             }
         }
-//comparacion de tipos Incompatibles-------------------------------------------------------------------------------
+    }
+}
+
+    private void tiposIncommpatibles() {
+        //comparacion de tipos Incompatibles-------------------------------------------------------------------------------
         if (!compProd.isEmpty()) {
             // Recorrer la producción de comparacion 
             int i = 0;
@@ -1239,29 +1311,9 @@ public class Compilador extends javax.swing.JFrame {
                 }
             }//For
         }//If
-
-    }//metodo semantico
-
-    private void verificarTiposYRealizarDivision(Production currentOp, String[] dividendoD, String[] divisorD) {
-        try {
-            if ("ENTERO".equals(dividendoD[0]) && "ENTERO".equals(divisorD[0])) {
-                int operacion = Integer.parseInt(divisorD[1]) / Integer.parseInt(dividendoD[1]);
-                String[] datosActu = {"ENTERO", String.valueOf(operacion)};
-                tablaSimbolos.put(currentOp.lexemeRank(7), datosActu);
-                actualizarJTable(currentOp.lexemeRank(7), datosActu);
-            } else if ("DECIMAL".equals(dividendoD[0]) && "DECIMAL".equals(divisorD[0])) {
-                float operacion = Float.parseFloat(divisorD[1]) / Float.parseFloat(dividendoD[1]);
-                String[] datosActu = {"DECIMAL", String.valueOf(operacion)};
-                tablaSimbolos.put(currentOp.lexemeRank(7), datosActu);
-                actualizarJTable(currentOp.lexemeRank(7), datosActu);
-            } else {
-                errors.add(new ErrorLSSL(7, "Error semántico {}: Operacion de tipos incompatibles [#,%]", currentOp, false));
-            }
-        } catch (NumberFormatException e) {
-            errors.add(new ErrorLSSL(9, "Error semántico {}: Formato de número inválido [#,%]", currentOp, false));
-        }
     }
 
+//errores semanticos------
 // Método para actualizar la JTable
     private void actualizarJTable(String identificador, String[] datosActualizados) {
         for (int row = 0; row < tablaS.getRowCount(); row++) {

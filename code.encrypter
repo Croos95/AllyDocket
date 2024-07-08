@@ -1,13 +1,24 @@
 VARIABLES {
-
-  	DECIMAL #B = 10.75;
-	DECIMAL #B1 =2.55;
-	DECIMAL #B2 = 0;
-	ENTERO   #AS =10;
+	ENTERO #A ="as";
+	ENTERO  #B =0;
+	ENTERO  #B =12;
+	ENTERO  #A1 =12;
+	DECIMAL #C=12.23;
 }
 
-PROCESOS {
+PROCESOS {	
+	
+	SUMA[#B,#C]=#A1;
+	
+	
+	IMPRIMIR[#A];
+	DIVISION[#B,#A1]=#A1;
+	MULTIPLICACION[#C,#C]=#A1;
+	SI(#A1==#C){
+		SI(#A1&&#A1){
+		}
+	}
 
-	MULTIPLICACION[#AS,#B1]=#B2;
+
 	
 }

@@ -729,10 +729,11 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("asignar", "ASIGNAR PARCUAA IDENTIFICADOR PARCUAC ASIGNACION (IDENTIFICADOR|VERDADERO|FALSO) ", 305, "Error Sintactico {}: Falta el fin de línea [#,%]");
 
         // Gramática para imprimir
-        gramatica.group("imprimir", "IMPRIMIR PARCUAA  (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC");
-        gramatica.group("imprimir", "IMPRIMIR IDENTIFICADOR (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC", 306, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
-        gramatica.group("imprimir", "IMPRIMIR PARCUAA PARCUAC", 307, "Error Sintactico {}: Falta el identificador a imprimir [#,%]");
-        gramatica.group("imprimir", "IMPRIMIR PARCUAA IDENTIFICADOR (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC", 308, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
+        gramatica.group("imprimir", "IMPRIMIR PARCUAA  (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC FINLINEA");
+        gramatica.group("imprimir", "IMPRIMIR IDENTIFICADOR (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC FINLINEA", 306, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
+        gramatica.group("imprimir", "IMPRIMIR PARCUAA PARCUAC FINLINEA", 307, "Error Sintactico {}: Falta el identificador a imprimir [#,%]");
+        gramatica.group("imprimir", "IMPRIMIR PARCUAA IDENTIFICADOR (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC FINLINEA", 308, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
+        gramatica.group("imprimir", "IMPRIMIR PARCUAA  (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC", 309, "Error Sintactico {}: Falta FINLINEA [;] [#,%]");
 
         // Gramática para comparaciones
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", compProd);
@@ -758,7 +759,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC ASIGNACION FINLINEA", 305, "Error Sintactico {}: Falta el identificador después de la asignación [#,%]");
         gramatica.group("raiz_cua", "RAIZ_CUADRADA PARCUAA IDENTIFICADOR PARCUAC ASIGNACION IDENTIFICADOR", 306, "Error Sintactico {}: Falta el fin de línea [#,%]");
 
-        // Definición de otras operaciones
+        // Definición de otras operaciones                              0                               1      2             3                      4                  5        6           7            8
         gramatica.group("operaciones_basicas", "(SUMA | RESTA | DIVISION | MULTIPLICACION | MODULO) PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR|NUMERO|NDECIMAL)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA");
         gramatica.group("operaciones_basicas", "PARCUAA IDENTIFICADOR (SEPARADOR IDENTIFICADOR|NUMERO|NDECIMAL)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1501, "Error Sintactico {}: Falta colocar la operación básica a realizar [#,%]");
         gramatica.group("operaciones_basicas", "(SUMA | RESTA | DIVISION | MULTIPLICACION | MODULO) IDENTIFICADOR (SEPARADOR IDENTIFICADOR|NUMERO|NDECIMAL)+ PARCUAC ASIGNACION IDENTIFICADOR FINLINEA", 1502, "Error Sintactico {}: Falta el paréntesis cuadrado de apertura [#,%]");
@@ -816,12 +817,12 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("bloque_variables", "VARIABLES CORA (variable)*", 7, "Error Sintactico {}: Falta cerrar el corchete bloque variables [#,%]");
 
         // Bloque main
-        gramatica.group("main", "(bloque_variables) (bloque_procesos)");
+//        gramatica.group("main", "(bloque_variables) (bloque_procesos)");
         gramatica.initialLineColumn();
 
         // Mostrar la gramática generada (opcional)
-        // jtaOutputConsole.append(gramatica.toString());
-        // gramatica.show();
+//        jtaOutputConsole.append(gramatica.toString());
+//        gramatica.show();
     }
 
     //Metodo para recorrer el HashMap de la Tabla de Simbolos
@@ -847,13 +848,13 @@ public class Compilador extends javax.swing.JFrame {
             if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
                 errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
             } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
-                errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
+                errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
             } else if (tipoDato.equals("TEXTO") && !valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
-                errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
+                errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
             } else if (tipoDato.equals("DECIMAL") && !valorAsignado.matches("[+-]?([0-9]*[.])?[0-9]+([eE][+-]?[0-9]+)?")) {
-                errors.add(new ErrorLSSL(2, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
+                errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
             } else if (tipoDato.equals("BOOLEANO") && !valorAsignado.matches("verdadero|falso")) {
-                errors.add(new ErrorLSSL(2, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
+                errors.add(new ErrorLSSL(1, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
             } else {
                 // Verificar si la variable ya está en el conjunto de identificadores
                 String variable = id.lexemeRank(1); //Almacenar variable temporal con el lexema osease el identificador como tal Ejemplo #C3
@@ -861,13 +862,15 @@ public class Compilador extends javax.swing.JFrame {
                 {
                     //Si encuentra duplicados emite el error y lo almacena tambien
                     System.out.println("Error: Variable duplicada = " + variable);
-                    errors.add(new ErrorLSSL(3, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable.concat(""), id, false));
+                    errors.add(new ErrorLSSL(2, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable.concat(""), id, false));
                 } else {
                     //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
                     identificadores.put(id.lexemeRank(1), tipoDato);
                     //LLAVE       VALOR[tipoDato, valor]
                     String[] datos = {tipoDato, valorAsignado};
+                                        //#A        //ENTERO  //12
                     tablaSimbolos.put(id.lexemeRank(1), datos);
+                                            //#A            //ENTERO
                     identificadores.put(id.lexemeRank(1), datos[0]);
                     String[] getDatos = tablaSimbolos.get(id.lexemeRank(1));
                     tablaS.addRow(new Object[]{id.lexemeRank(1), getDatos[0], getDatos[1]});//tambien se mandan a la tabla en la GUI
@@ -880,6 +883,7 @@ public class Compilador extends javax.swing.JFrame {
     }
 
     private void variableNoDeclarada() {
+        int contador = 0;
         // Error de variable siendo usada sin declararse------------------------------------------------------------------------------
         if (!mainProd.isEmpty()) {
             // Recorrer la producción principal en búsqueda de una variable
@@ -888,22 +892,23 @@ public class Compilador extends javax.swing.JFrame {
                     String lexema = token.getLexeme();
                     if (!tablaSimbolos.containsKey(lexema)) {
                         System.out.println("NO ESTA DECLARADA ESTA VARIABLE!!!= " + token.getLexeme());
-                        errors.add(new ErrorLSSL(4, "Error semántico {}: este identificador no está declarado [#,%] = " + token.getLexeme(), token));
-                    } else {
-                        divsion0yOperaciones();
-                        tiposIncommpatibles();
+                        errors.add(new ErrorLSSL(3, "Error semántico {}: este identificador no está declarado [#,%] = " + token.getLexeme(), token));
                     }
                 }//if
+
             }//for
+            division0yOperaciones();
+            tiposIncommpatibles();
+            System.out.println("EJECUTADO =" + contador);
+            contador++;
         }//if
     }
 
-    private void divsion0yOperaciones() {
+    private void division0yOperaciones() {
         if (!opProd.isEmpty()) {
             Production currentOp = opProd.get(0);
             int j = 0;
             List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
-
             while (j < currentOp.getSizeTokens()) {
                 Token token = currentOp.getTokens().get(j);
                 switch (token.getLexeme()) {
@@ -915,16 +920,7 @@ public class Compilador extends javax.swing.JFrame {
                         int k = j + 2;
                         boolean errorEncontrado = false;
                         String operacion = token.getLexeme();
-                        String identificadorAlmacen = currentOp.lexemeRank(currentOp.getSizeTokens() - 2);
-                        String almacen = identificadores.get(identificadorAlmacen);
-
-                        if (almacen == null) {
-                            errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador de almacenamiento no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-                            j++;
-                            continue;
-                        }
-
-                        String tipoResultado = almacen.equals("DECIMAL") ? "DECIMAL" : "ENTERO";
+                        // Continuar solo si ultimo no es vacío
 
                         while (k < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(k).equals("ASIGNACION")) {
                             if (valoresValidos.contains(currentOp.lexicalCompRank(k))) {
@@ -933,16 +929,17 @@ public class Compilador extends javax.swing.JFrame {
                                     errorEncontrado = true;
                                     break;
                                 }
-
-                                if (!almacen.equals(currentOp.lexicalCompRank(k))
-                                        && !currentOp.lexicalCompRank(k).equals("NUMERO")
-                                        && !currentOp.lexicalCompRank(k).equals("NDECIMAL")) {
-                                    errors.add(new ErrorLSSL(6, "Error semántico {}: Operacion de tipos incompatibles [#,%]", currentOp, false));
+                                String am = identificadores.getOrDefault(currentOp.lexemeRank(k), "");
+                                String am2 = identificadores.getOrDefault(currentOp.lexemeRank(k+2), "");
+                                if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
+                                        && currentOp.lexicalCompRank(k).equals("NUMERO")
+                                        && currentOp.lexicalCompRank(k+2).equals("NDECIMAL")) {
+                                    errors.add(new ErrorLSSL(4, "Error semántico {}: Operación de tipos incompatibles [#,%] En la operación =[ " + operacion + "]", currentOp, false));
                                     errorEncontrado = true;
                                     break;
                                 }
 
-                                if (currentOp.lexicalCompRank(k).equals("NDECIMAL")) {
+                                if (currentOp.lexicalCompRank(k).equals("NDECIMAL") || am.equals("DECIMAL")) {
                                     esDecimal = true;
                                 }
 
@@ -954,21 +951,27 @@ public class Compilador extends javax.swing.JFrame {
                             }
                             k++;
                         }
-
+                        
                         if (errorEncontrado) {
                             j++;
                             continue;
                         }
-
-                        if (tipoResultado.equals("ENTERO") && esDecimal) {
-                            errors.add(new ErrorLSSL(6, "Error semántico {}: Resultado debe ser ENTERO pero hay operandos DECIMAL [#,%]", currentOp, false));
-                        } else if (tipoResultado.equals("DECIMAL") && !esDecimal) {
-                            errors.add(new ErrorLSSL(6, "Error semántico {}: Resultado debe ser DECIMAL pero hay operandos ENTERO [#,%]", currentOp, false));
+                        
+                    String datoAlm = identificadores.get(currentOp.lexemeRank(k+1));
+                        if (datoAlm.equals("ENTERO") && esDecimal) {
+                            errors.add(new ErrorLSSL(6, "Error semántico {}: DECIMAL no se puede asignar a ENTERO [#,%][ " + operacion + "]", currentOp, false));
+                        } else if (datoAlm.equals("DECIMAL") && !esDecimal) {
+                            errors.add(new ErrorLSSL(6, "Error semántico {}: ENTERO no se puede asignar a DECIMAL [#,%][ " + operacion + "]", currentOp, false));
                         }
 
                         j = k + 2;
                         break;
 
+
+                    case "IMPRIMIR":
+                        System.out.println("IMPRIMIR");
+                        j++;  // Incrementar `j` para avanzar al siguiente token
+                        break;
                     default:
                         j++;
                         break;
@@ -983,7 +986,7 @@ public class Compilador extends javax.swing.JFrame {
                 case "IDENTIFICADOR":
                     String[] datos = tablaSimbolos.get(lexema);
                     if (datos == null) {
-                        errors.add(new ErrorLSSL(4, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                        errors.add(new ErrorLSSL(3, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
                         return Double.MIN_VALUE;
                     }
                     return Double.parseDouble(datos[1]);
@@ -1013,7 +1016,7 @@ public class Compilador extends javax.swing.JFrame {
                 String comparador2 = comp.lexemeRank(2);//#id2
                 // Verificar si ambos comparadores están en la tabla de identificadores
                 if (!identificadores.containsKey(comparador1) || !identificadores.containsKey(comparador2)) {
-                    errors.add(new ErrorLSSL(5, "Error semántico {}: uno de los identificadores no está declarado [#,%] = [" + comparador1 + "] o [" + comparador2 + "]", comp, false));
+                    errors.add(new ErrorLSSL(3, "Error semántico {}: uno de los identificadores no está declarado [#,%] = [" + comparador1 + "] o [" + comparador2 + "]", comp, false));
                     continue; // Saltar esta comparación si uno de los identificadores no está declarado
                 }
 
@@ -1023,7 +1026,7 @@ public class Compilador extends javax.swing.JFrame {
 
                 // si #id1 --> tipo de dato != #id2 --> tipo de dato
                 if (!tipo1.equals(tipo2)) {
-                    errors.add(new ErrorLSSL(5, "Error semántico {}: comparacion de tipos Incompatibles [#,%] = [" + tipo1 + "] y [" + tipo2 + "]", comp, false));
+                    errors.add(new ErrorLSSL(7, "Error semántico {}: comparacion de tipos Incompatibles [#,%] = [" + tipo1 + "] y [" + tipo2 + "]", comp, false));
                 } else {
                     // Obtener los valores reales de los comparadores
                     String[] valor1 = tablaSimbolos.get(comparador1);
@@ -1037,7 +1040,6 @@ public class Compilador extends javax.swing.JFrame {
                         switch (operador) {
                             case "==":
                                 if (!valor1Real.equals(valor2Real)) {
-                                    errors.add(new ErrorLSSL(8, "Error semántico {}: los valores no son iguales [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
                                 } else {
@@ -1047,7 +1049,6 @@ public class Compilador extends javax.swing.JFrame {
                                 break;
                             case "!=":
                                 if (valor1Real.equals(valor2Real)) {
-                                    errors.add(new ErrorLSSL(8, "Error semántico {}: los valores son iguales [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
                                 } else {
@@ -1057,7 +1058,7 @@ public class Compilador extends javax.swing.JFrame {
                                 break;
                             case "<<":
                                 if (Float.parseFloat(valor1Real) >= Float.parseFloat(valor2Real)) {
-                                    errors.add(new ErrorLSSL(8, "Error semántico {}: el valor no es menor [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
                                 } else {
@@ -1067,7 +1068,7 @@ public class Compilador extends javax.swing.JFrame {
                                 break;
                             case ">>":
                                 if (Float.parseFloat(valor1Real) <= Float.parseFloat(valor2Real)) {
-                                    errors.add(new ErrorLSSL(8, "Error semántico {}: el valor no es mayor [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
                                 } else {
@@ -1077,7 +1078,7 @@ public class Compilador extends javax.swing.JFrame {
                                 break;
                             case "<=":
                                 if (Float.parseFloat(valor1Real) > Float.parseFloat(valor2Real)) {
-                                    errors.add(new ErrorLSSL(8, "Error semántico {}: el valor no es menor o igual [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
+
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
                                 } else {
@@ -1087,7 +1088,6 @@ public class Compilador extends javax.swing.JFrame {
                                 break;
                             case ">=":
                                 if (Float.parseFloat(valor1Real) < Float.parseFloat(valor2Real)) {
-                                    errors.add(new ErrorLSSL(8, "Error semántico {}: el valor no es mayor o igual [#,%] = [" + valor1Real + "] y [" + valor2Real + "]", comp, false));
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
                                 } else {
@@ -1096,11 +1096,11 @@ public class Compilador extends javax.swing.JFrame {
                                 }
                                 break;
                             default:
-                                errors.add(new ErrorLSSL(10, "Error semántico {}: operador de comparación no reconocido [#,%] = " + operador, comp, false));
+                                errors.add(new ErrorLSSL(8, "Error semántico {}: operador de comparación no reconocido [#,%] = " + operador, comp, false));
                                 break;
                         }
                     } catch (NumberFormatException e) {
-                        errors.add(new ErrorLSSL(9, "Error semántico {}: formato de número inválido [#,%]", comp, false));
+                        errors.add(new ErrorLSSL(6, "Error semántico {}: formato de número inválido [#,%]", comp, false));
                     }
                     //Condicion No Booleana--------------------------------------------------------------------------------------------------
                 }

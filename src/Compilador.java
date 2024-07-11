@@ -868,9 +868,9 @@ public class Compilador extends javax.swing.JFrame {
                     identificadores.put(id.lexemeRank(1), tipoDato);
                     //LLAVE       VALOR[tipoDato, valor]
                     String[] datos = {tipoDato, valorAsignado};
-                                        //#A        //ENTERO  //12
+                    //#A        //ENTERO  //12
                     tablaSimbolos.put(id.lexemeRank(1), datos);
-                                            //#A            //ENTERO
+                    //#A            //ENTERO
                     identificadores.put(id.lexemeRank(1), datos[0]);
                     String[] getDatos = tablaSimbolos.get(id.lexemeRank(1));
                     tablaS.addRow(new Object[]{id.lexemeRank(1), getDatos[0], getDatos[1]});//tambien se mandan a la tabla en la GUI
@@ -909,6 +909,8 @@ public class Compilador extends javax.swing.JFrame {
             Production currentOp = opProd.get(0);
             int j = 0;
             List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
+            codigoIntermedio GCI = new codigoIntermedio();
+
             while (j < currentOp.getSizeTokens()) {
                 Token token = currentOp.getTokens().get(j);
                 switch (token.getLexeme()) {
@@ -920,7 +922,8 @@ public class Compilador extends javax.swing.JFrame {
                         int k = j + 2;
                         boolean errorEncontrado = false;
                         String operacion = token.getLexeme();
-                        // Continuar solo si ultimo no es vacío
+                        String am = identificadores.getOrDefault(currentOp.lexemeRank(k), "");
+                        String am2 = identificadores.getOrDefault(currentOp.lexemeRank(k + 2), "");
 
                         while (k < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(k).equals("ASIGNACION")) {
                             if (valoresValidos.contains(currentOp.lexicalCompRank(k))) {
@@ -929,11 +932,9 @@ public class Compilador extends javax.swing.JFrame {
                                     errorEncontrado = true;
                                     break;
                                 }
-                                String am = identificadores.getOrDefault(currentOp.lexemeRank(k), "");
-                                String am2 = identificadores.getOrDefault(currentOp.lexemeRank(k+2), "");
                                 if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
                                         && currentOp.lexicalCompRank(k).equals("NUMERO")
-                                        && currentOp.lexicalCompRank(k+2).equals("NDECIMAL")) {
+                                        && currentOp.lexicalCompRank(k + 2).equals("NDECIMAL")) {
                                     errors.add(new ErrorLSSL(4, "Error semántico {}: Operación de tipos incompatibles [#,%] En la operación =[ " + operacion + "]", currentOp, false));
                                     errorEncontrado = true;
                                     break;
@@ -948,16 +949,17 @@ public class Compilador extends javax.swing.JFrame {
                                     errorEncontrado = true;
                                     break;
                                 }
+                                GCI.generarCodigoIntermedio(operacion, currentOp.lexemeRank(k), currentOp.lexemeRank(k + 2));
                             }
                             k++;
                         }
-                        
+
                         if (errorEncontrado) {
                             j++;
                             continue;
                         }
-                        
-                    String datoAlm = identificadores.get(currentOp.lexemeRank(k+1));
+
+                        String datoAlm = identificadores.get(currentOp.lexemeRank(k + 1));
                         if (datoAlm.equals("ENTERO") && esDecimal) {
                             errors.add(new ErrorLSSL(6, "Error semántico {}: DECIMAL no se puede asignar a ENTERO [#,%][ " + operacion + "]", currentOp, false));
                         } else if (datoAlm.equals("DECIMAL") && !esDecimal) {
@@ -966,7 +968,6 @@ public class Compilador extends javax.swing.JFrame {
 
                         j = k + 2;
                         break;
-
 
                     case "IMPRIMIR":
                         System.out.println("IMPRIMIR");
@@ -977,6 +978,9 @@ public class Compilador extends javax.swing.JFrame {
                         break;
                 }
             }
+
+            // Imprimir el código intermedio generado
+            GCI.imprimirCodigoIntermedio();
         }
     }
 
@@ -1108,7 +1112,7 @@ public class Compilador extends javax.swing.JFrame {
         }//If
     }
 
-//errores semanticos------
+    //-------------------------------------------------------------------------------------------
 // Método para actualizar la JTable
     private void actualizarJTable(String identificador, String[] datosActualizados) {
         for (int row = 0; row < tablaS.getRowCount(); row++) {

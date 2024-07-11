@@ -922,8 +922,8 @@ public class Compilador extends javax.swing.JFrame {
                         int k = j + 2;
                         boolean errorEncontrado = false;
                         String operacion = token.getLexeme();
-                        String am = identificadores.getOrDefault(currentOp.lexemeRank(k), "");
-                        String am2 = identificadores.getOrDefault(currentOp.lexemeRank(k + 2), "");
+                        String operando1 = currentOp.lexemeRank(k);
+                        String operando2 = currentOp.lexemeRank(k + 2);
 
                         while (k < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(k).equals("ASIGNACION")) {
                             if (valoresValidos.contains(currentOp.lexicalCompRank(k))) {
@@ -932,6 +932,8 @@ public class Compilador extends javax.swing.JFrame {
                                     errorEncontrado = true;
                                     break;
                                 }
+                                String am = identificadores.getOrDefault(currentOp.lexemeRank(k), "");
+                                String am2 = identificadores.getOrDefault(currentOp.lexemeRank(k + 2), "");
                                 if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
                                         && currentOp.lexicalCompRank(k).equals("NUMERO")
                                         && currentOp.lexicalCompRank(k + 2).equals("NDECIMAL")) {
@@ -949,7 +951,6 @@ public class Compilador extends javax.swing.JFrame {
                                     errorEncontrado = true;
                                     break;
                                 }
-                                GCI.generarCodigoIntermedio(operacion, currentOp.lexemeRank(k), currentOp.lexemeRank(k + 2));
                             }
                             k++;
                         }
@@ -958,6 +959,9 @@ public class Compilador extends javax.swing.JFrame {
                             j++;
                             continue;
                         }
+
+                        String resultado = currentOp.lexemeRank(k + 1);
+                        GCI.generarCodigoIntermedio(operacion, operando1, operando2, resultado);
 
                         String datoAlm = identificadores.get(currentOp.lexemeRank(k + 1));
                         if (datoAlm.equals("ENTERO") && esDecimal) {

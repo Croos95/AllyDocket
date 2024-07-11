@@ -142,6 +142,8 @@ public class Compilador extends javax.swing.JFrame {
         tblTokens = new javax.swing.JTable();
         jScrollPane4 = new javax.swing.JScrollPane();
         TblSimbolos = new javax.swing.JTable();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        jTextAreaCodigoIntermedio = new javax.swing.JTextArea();
         PnlLogos = new javax.swing.JPanel();
         TxtLogo = new javax.swing.JLabel();
         TxtTec = new javax.swing.JLabel();
@@ -351,6 +353,12 @@ public class Compilador extends javax.swing.JFrame {
         jScrollPane4.setViewportView(TblSimbolos);
 
         TabbedPane.addTab("Tabla de simbolos", jScrollPane4);
+
+        jTextAreaCodigoIntermedio.setColumns(20);
+        jTextAreaCodigoIntermedio.setRows(5);
+        jScrollPane5.setViewportView(jTextAreaCodigoIntermedio);
+
+        TabbedPane.addTab("Codigo Intermedio", jScrollPane5);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -923,7 +931,7 @@ public class Compilador extends javax.swing.JFrame {
                         boolean errorEncontrado = false;
                         String operacion = token.getLexeme();
                         String operando1 = currentOp.lexemeRank(k);
-                        String operando2 = currentOp.lexemeRank(k + 2);
+                        String operando2 = currentOp.lexemeRank(k+2);
 
                         while (k < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(k).equals("ASIGNACION")) {
                             if (valoresValidos.contains(currentOp.lexicalCompRank(k))) {
@@ -971,6 +979,13 @@ public class Compilador extends javax.swing.JFrame {
                         }
 
                         j = k + 2;
+                        break;
+
+                    case "ASIGNAR":
+                        String variableDestino = currentOp.lexemeRank(j + 2);
+                        String variableOrigen = currentOp.lexemeRank(j + 5);
+                        GCI.generarCodigoIntermedio("ASIGNAR", variableOrigen, "", variableDestino);
+                        j = j + 7;  // Ajustar el índice para saltar la operación de asignación completa
                         break;
 
                     case "IMPRIMIR":
@@ -1251,8 +1266,10 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator6;
+    public static javax.swing.JTextArea jTextAreaCodigoIntermedio;
     private javax.swing.JTextArea jtaOutputConsole;
     private javax.swing.JTextPane jtpCode;
     private javax.swing.JMenu mEjecutar;

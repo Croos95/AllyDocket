@@ -1,9 +1,11 @@
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class codigoIntermedio {
 
     public static class Quadruple {
+
         public String operador;
         public String operador1;
         public String operador2;
@@ -18,7 +20,11 @@ public class codigoIntermedio {
 
         @Override
         public String toString() {
-            return resultado + " = " + operador1 + " " + operador + " " + operador2;
+            if (operador.isEmpty()) {
+                return resultado + " = " + operador1;
+            } else {
+                return resultado + " = " + operador1 + " " + operador + " " + operador2;
+            }
         }
     }
 
@@ -45,14 +51,17 @@ public class codigoIntermedio {
                 return "+";
             case "RESTA":
                 return "-";
+            case "ASIGNAR":
+                return "";  // Asignación no necesita operador
             default:
-                return "NO HAY OPERADOR";
+                return "";
         }
     }
 
     public void imprimirCodigoIntermedio() {
         for (Quadruple quad : codigoIntermedio) {
-            System.out.println(quad);
+            // Aquí se manda a un textArea en la GUI del frame Compilador
+            Compilador.jTextAreaCodigoIntermedio.append(quad.toString() + "\n");
         }
     }
 }

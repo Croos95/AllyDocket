@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,16 +19,16 @@ public class codigoIntermedio {
 
         @Override
         public String toString() {
-            if (operador.isEmpty()) {
-                return resultado + " = " + operador1;
+            if (operador.equals("=")) {
+                return operador + " , " + operador1 + " , " + resultado;
             } else {
-                return resultado + " = " + operador1 + " " + operador + " " + operador2;
+                return operador + " , " + operador1 + " , " + operador2 + " , " + resultado;
             }
         }
     }
 
-    public List<Quadruple> codigoIntermedio = new ArrayList<>();
-    private int contadorTemporal = 0;
+    public static List<Quadruple> codigoIntermedio = new ArrayList<>();
+    public static int contadorTemporal = 0;
 
     public String generarTemporal() {
         return "T" + (contadorTemporal++);
@@ -52,7 +51,7 @@ public class codigoIntermedio {
             case "RESTA":
                 return "-";
             case "ASIGNAR":
-                return "";  // Asignación no necesita operador
+                return "=";  
             default:
                 return "";
         }
@@ -62,6 +61,7 @@ public class codigoIntermedio {
         for (Quadruple quad : codigoIntermedio) {
             // Aquí se manda a un textArea en la GUI del frame Compilador
             Compilador.jTextAreaCodigoIntermedio.append(quad.toString() + "\n");
+            Compilador.tablaC.addRow(new Object[]{quad.operador, quad.operador1, quad.operador2, quad.resultado});
         }
     }
 }

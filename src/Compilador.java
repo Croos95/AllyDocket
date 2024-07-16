@@ -59,7 +59,11 @@ public class Compilador extends javax.swing.JFrame {
     private HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
     private HashMap<String, String[]> tablaSimbolos;
+    HashMap<String, String> identDataType = new HashMap<>();
+    codigoIntermedio GCI = new codigoIntermedio();
     DefaultTableModel tablaS;
+    public static DefaultTableModel tablaC;
+                            List<String> operandos = new ArrayList<>();
     Grammar gramatica;
 
     /**
@@ -115,6 +119,7 @@ public class Compilador extends javax.swing.JFrame {
         diviProd = new ArrayList<>();
         mientrasProd = new ArrayList<>();
         tablaS = (DefaultTableModel) TblSimbolos.getModel();
+        tablaC = (DefaultTableModel) TablaCuadruplos.getModel();
         Functions.setAutocompleterJTextComponent(new String[]{"VAR { \n  \n }"}, jtpCode, () -> {
             timerKeyReleased.restart();
         });
@@ -144,6 +149,8 @@ public class Compilador extends javax.swing.JFrame {
         TblSimbolos = new javax.swing.JTable();
         jScrollPane5 = new javax.swing.JScrollPane();
         jTextAreaCodigoIntermedio = new javax.swing.JTextArea();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        TablaCuadruplos = new javax.swing.JTable();
         PnlLogos = new javax.swing.JPanel();
         TxtLogo = new javax.swing.JLabel();
         TxtTec = new javax.swing.JLabel();
@@ -359,6 +366,18 @@ public class Compilador extends javax.swing.JFrame {
         jScrollPane5.setViewportView(jTextAreaCodigoIntermedio);
 
         TabbedPane.addTab("Codigo Intermedio", jScrollPane5);
+
+        TablaCuadruplos.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Operador", "Arg1", "Arg2", "Resultado"
+            }
+        ));
+        jScrollPane6.setViewportView(TablaCuadruplos);
+
+        TabbedPane.addTab("Cuádruplos", jScrollPane6);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -839,7 +858,7 @@ public class Compilador extends javax.swing.JFrame {
     }//metodo semantico
 
     private void tipoDatoIncompatibleyAsignacion() {
-        HashMap<String, String> identDataType = new HashMap<>();
+
         // Definición de tipos de datos--------------------------------------------------------------------------------------------------------------
         //llave    //valor
         identDataType.put("BOOLEANO", "BOOLEANO");
@@ -850,44 +869,73 @@ public class Compilador extends javax.swing.JFrame {
         for (Production id : identProd) {
             String tipoDato = id.lexemeRank(0);
             String valorAsignado = id.lexemeRank(3);
-            String tipoEsperado = identDataType.get(tipoDato);
-            System.out.println(tipoDato);
-            //SI NO ES EL TIPO ESPERADO
-            if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
-                errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
-            } else if (tipoDato.equals("ENTERO") && !valorAsignado.matches("[0-9]+")) {
-                errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
-            } else if (tipoDato.equals("TEXTO") && !valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
-                errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
-            } else if (tipoDato.equals("DECIMAL") && !valorAsignado.matches("[+-]?([0-9]*[.])?[0-9]+([eE][+-]?[0-9]+)?")) {
-                errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
-            } else if (tipoDato.equals("BOOLEANO") && !valorAsignado.matches("verdadero|falso")) {
-                errors.add(new ErrorLSSL(1, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
+            verificarCompatibilidadTipo(tipoDato, valorAsignado, id);
+            // Verificar si la variable ya está en el conjunto de identificadores
+            String variable = id.lexemeRank(1); //Almacenar variable temporal con el lexema osease el identificador como tal Ejemplo #C3
+            if (identificadores.containsKey(variable))//Utilizamos el identificador para buscar duplicados en el HashMap de iidentificadores ya guardados
+            {
+                //Si encuentra duplicados emite el error y lo almacena tambien
+                System.out.println("Error: Variable duplicada = " + variable);
+                errors.add(new ErrorLSSL(2, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable.concat(""), id, false));
             } else {
-                // Verificar si la variable ya está en el conjunto de identificadores
-                String variable = id.lexemeRank(1); //Almacenar variable temporal con el lexema osease el identificador como tal Ejemplo #C3
-                if (identificadores.containsKey(variable))//Utilizamos el identificador para buscar duplicados en el HashMap de iidentificadores ya guardados
-                {
-                    //Si encuentra duplicados emite el error y lo almacena tambien
-                    System.out.println("Error: Variable duplicada = " + variable);
-                    errors.add(new ErrorLSSL(2, "Error semántico {}: declaracion de variable duplicada [#,%] = " + variable.concat(""), id, false));
-                } else {
-                    //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
-                    identificadores.put(id.lexemeRank(1), tipoDato);
-                    //LLAVE       VALOR[tipoDato, valor]
-                    String[] datos = {tipoDato, valorAsignado};
-                    //#A        //ENTERO  //12
-                    tablaSimbolos.put(id.lexemeRank(1), datos);
-                    //#A            //ENTERO
-                    identificadores.put(id.lexemeRank(1), datos[0]);
-                    String[] getDatos = tablaSimbolos.get(id.lexemeRank(1));
-                    tablaS.addRow(new Object[]{id.lexemeRank(1), getDatos[0], getDatos[1]});//tambien se mandan a la tabla en la GUI
-                    System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
+                //Cuando no se detecta ningun error se agregan a los respectivos HashMap y Tabla de Simbolos
+                identificadores.put(id.lexemeRank(1), tipoDato);
+                //LLAVE       VALOR[tipoDato, valor]
+                String[] datos = {tipoDato, valorAsignado};
+                //#A        //ENTERO  //12
+                tablaSimbolos.put(id.lexemeRank(1), datos);
+                //#A            //ENTERO
+                identificadores.put(id.lexemeRank(1), datos[0]);
+                String[] getDatos = tablaSimbolos.get(id.lexemeRank(1));
+                tablaS.addRow(new Object[]{id.lexemeRank(1), getDatos[0], getDatos[1]});//tambien se mandan a la tabla en la GUI
+                //
+                GCI.generarCodigoIntermedio("ASIGNAR", datos[1], "", id.lexemeRank(1));//GENERAR CUADRUPLOS
+                //
+                System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
 
-                }
             }
+
         }//for identProd
         variableNoDeclarada();
+    }
+
+    private void verificarCompatibilidadTipo(String tipoDato, String valorAsignado, Production id) {
+        if (!identDataType.containsKey(tipoDato)) {
+            errors.add(new ErrorLSSL(1, "Error semántico {}: tipo de dato desconocido [#,%]", id, true));
+            return;
+        }
+
+        String tipoEsperado = identDataType.get(tipoDato);
+        if (!tipoEsperado.equals(id.lexicalCompRank(0))) {
+            errors.add(new ErrorLSSL(1, "Error semántico {}: valor no compatible con el tipo de dato [#,%]", id, true));
+        } else {
+            validarValorAsignado(tipoDato, valorAsignado, id);
+        }
+    }
+
+    private void validarValorAsignado(String tipoDato, String valorAsignado, Production id) {
+        switch (tipoDato) {
+            case "ENTERO":
+                if (!valorAsignado.matches("[0-9]+")) {
+                    errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es un número entero [#,%]", id, false));
+                }
+                break;
+            case "TEXTO":
+                if (!valorAsignado.matches("\"[0-9]*[a-zA-Z]+\"")) {
+                    errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es una cadena [#,%]", id, false));
+                }
+                break;
+            case "DECIMAL":
+                if (!valorAsignado.matches("[+-]?([0-9]*[.])?[0-9]+([eE][+-]?[0-9]+)?")) {
+                    errors.add(new ErrorLSSL(1, "Error semántico {}: el valor no es un número flotante [#,%]", id, false));
+                }
+                break;
+            case "BOOLEANO":
+                if (!valorAsignado.matches("verdadero|falso")) {
+                    errors.add(new ErrorLSSL(1, "Error semántico {}: solo se acepta 'verdadero' o 'falso' [#,%]", id, false));
+                }
+                break;
+        }
     }
 
     private void variableNoDeclarada() {
@@ -917,7 +965,8 @@ public class Compilador extends javax.swing.JFrame {
             Production currentOp = opProd.get(0);
             int j = 0;
             List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
-            codigoIntermedio GCI = new codigoIntermedio();
+
+
 
             while (j < currentOp.getSizeTokens()) {
                 Token token = currentOp.getTokens().get(j);
@@ -930,8 +979,6 @@ public class Compilador extends javax.swing.JFrame {
                         int k = j + 2;
                         boolean errorEncontrado = false;
                         String operacion = token.getLexeme();
-                        String operando1 = currentOp.lexemeRank(k);
-                        String operando2 = currentOp.lexemeRank(k+2);
 
                         while (k < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(k).equals("ASIGNACION")) {
                             if (valoresValidos.contains(currentOp.lexicalCompRank(k))) {
@@ -959,25 +1006,31 @@ public class Compilador extends javax.swing.JFrame {
                                     errorEncontrado = true;
                                     break;
                                 }
+                                String operando = currentOp.lexemeRank(k);
+                                operandos.add(operando);
                             }
                             k++;
                         }
 
-                        if (errorEncontrado) {
-                            j++;
-                            continue;
+                        if (!errorEncontrado) {
+                            String resultado = currentOp.lexemeRank(k + 1);
+                            String temp = operandos.get(0);
+
+                            for (int i = 1; i < operandos.size(); i++) {
+                                String operando = operandos.get(i);
+                                String nuevoTemp = GCI.generarTemporal();
+                                GCI.generarCodigoIntermedio(operacion, temp, operando, nuevoTemp);
+                                temp = nuevoTemp;
+                            }
+                            GCI.generarCodigoIntermedio("ASIGNAR", temp, "", resultado);
+                            operandos.clear();
+                            String datoAlm = identificadores.get(currentOp.lexemeRank(k + 1));
+                            if (datoAlm.equals("ENTERO") && esDecimal) {
+                                errors.add(new ErrorLSSL(6, "Error semántico {}: DECIMAL no se puede asignar a ENTERO [#,%][ " + operacion + "]", currentOp, false));
+                            } else if (datoAlm.equals("DECIMAL") && !esDecimal) {
+                                errors.add(new ErrorLSSL(6, "Error semántico {}: ENTERO no se puede asignar a DECIMAL [#,%][ " + operacion + "]", currentOp, false));
+                            }
                         }
-
-                        String resultado = currentOp.lexemeRank(k + 1);
-                        GCI.generarCodigoIntermedio(operacion, operando1, operando2, resultado);
-
-                        String datoAlm = identificadores.get(currentOp.lexemeRank(k + 1));
-                        if (datoAlm.equals("ENTERO") && esDecimal) {
-                            errors.add(new ErrorLSSL(6, "Error semántico {}: DECIMAL no se puede asignar a ENTERO [#,%][ " + operacion + "]", currentOp, false));
-                        } else if (datoAlm.equals("DECIMAL") && !esDecimal) {
-                            errors.add(new ErrorLSSL(6, "Error semántico {}: ENTERO no se puede asignar a DECIMAL [#,%][ " + operacion + "]", currentOp, false));
-                        }
-
                         j = k + 2;
                         break;
 
@@ -992,6 +1045,7 @@ public class Compilador extends javax.swing.JFrame {
                         System.out.println("IMPRIMIR");
                         j++;  // Incrementar `j` para avanzar al siguiente token
                         break;
+
                     default:
                         j++;
                         break;
@@ -1170,6 +1224,7 @@ public class Compilador extends javax.swing.JFrame {
         errors.clear();
         Functions.clearDataInTable(tblTokens);
         Functions.clearDataInTable(TblSimbolos);
+        Functions.clearDataInTable(TablaCuadruplos);
         jtaOutputConsole.setText("");
         tokens.clear();
         identProd.clear();
@@ -1182,6 +1237,8 @@ public class Compilador extends javax.swing.JFrame {
         tablaSimbolos.clear();
         diviProd.clear();
         mientrasProd.clear();
+        codigoIntermedio.contadorTemporal=0;
+        codigoIntermedio.codigoIntermedio.clear();
         codeHasBeenCompiled = false;
     }
 
@@ -1240,6 +1297,7 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JPanel PnlLogos;
     private javax.swing.JPanel PnlLogos1;
     private javax.swing.JTabbedPane TabbedPane;
+    public static javax.swing.JTable TablaCuadruplos;
     private javax.swing.JTable TblSimbolos;
     private javax.swing.JLabel TxtLogo;
     private javax.swing.JLabel TxtTec;
@@ -1267,6 +1325,7 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator6;
     public static javax.swing.JTextArea jTextAreaCodigoIntermedio;

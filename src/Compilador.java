@@ -16,10 +16,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -63,7 +67,7 @@ public class Compilador extends javax.swing.JFrame {
     codigoIntermedio GCI = new codigoIntermedio();
     DefaultTableModel tablaS;
     public static DefaultTableModel tablaC;
-                            List<String> operandos = new ArrayList<>();
+    List<String> operandos = new ArrayList<>();
     Grammar gramatica;
 
     /**
@@ -138,6 +142,7 @@ public class Compilador extends javax.swing.JFrame {
         btnCompilar = new javax.swing.JButton();
         btnEjecutar = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
+        btnExportar = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtpCode = new javax.swing.JTextPane();
@@ -244,6 +249,16 @@ public class Compilador extends javax.swing.JFrame {
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText(" Compilador para un lenguaje de control de gastos financieros");
 
+        btnExportar.setBackground(new java.awt.Color(52, 73, 94));
+        btnExportar.setForeground(new java.awt.Color(200, 195, 199));
+        btnExportar.setText("Exportar txt's");
+        btnExportar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        btnExportar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportarActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout buttonsFilePanelLayout = new javax.swing.GroupLayout(buttonsFilePanel);
         buttonsFilePanel.setLayout(buttonsFilePanelLayout);
         buttonsFilePanelLayout.setHorizontalGroup(
@@ -259,7 +274,9 @@ public class Compilador extends javax.swing.JFrame {
                 .addComponent(btnGuardarC)
                 .addGap(109, 109, 109)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 93, Short.MAX_VALUE)
+                .addComponent(btnExportar)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCompilar, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(6, 6, 6)
                 .addComponent(btnEjecutar, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -276,7 +293,8 @@ public class Compilador extends javax.swing.JFrame {
                     .addComponent(btnGuardarC)
                     .addComponent(btnCompilar)
                     .addComponent(btnEjecutar)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(btnExportar))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -447,7 +465,7 @@ public class Compilador extends javax.swing.JFrame {
             PnlLogos1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(PnlLogos1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -687,8 +705,54 @@ public class Compilador extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuCompilarActionPerformed
 
     private void BtnIntegrantesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnIntegrantesActionPerformed
-        JOptionPane.showMessageDialog(null, "Este compilador fue realizado por:\n- Arath De Jesus Cortez Salinas.\n- Hannia Ali Ortega De Luna.\n- Alan Daniel Rodriguez Godinez.\n- Jose Fernando Ruiz Campos.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, "Este compilador fue realizado por:\n- Arath De Jesus Cortez Salinas.\n- Jose Fernando Ruiz Campos.", "Información", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_BtnIntegrantesActionPerformed
+
+    private void btnExportarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportarActionPerformed
+        String TxtCodInter = jTextAreaCodigoIntermedio.getText();
+        String RutaIntermedio = "src/ArchivosTXT/Codigo Intermedio.txt";
+        String RutaCua = "src/ArchivosTXT/Cuadruplos.txt";
+
+        BufferedWriter writer = null;
+        BufferedWriter writer2 = null;
+
+        try {
+            // Guardar el contenido del JTextArea en un archivo de texto
+            writer = new BufferedWriter(new FileWriter(RutaIntermedio));
+            writer.write(TxtCodInter);
+
+            // Guardar el contenido de la JTable en otro archivo de texto
+            writer2 = new BufferedWriter(new FileWriter(RutaCua));
+            for (int i = 0; i < TablaCuadruplos.getColumnCount(); i++) {
+                writer2.write(TablaCuadruplos.getColumnName(i) + "\t");
+            }
+            writer2.write("\n");
+            for (int i = 0; i < TablaCuadruplos.getRowCount(); i++) {
+                for (int j = 0; j < TablaCuadruplos.getColumnCount(); j++) {
+                    writer2.write(TablaCuadruplos.getValueAt(i, j).toString() + "\t");
+                }
+                writer2.write("\n");
+            }
+
+            JOptionPane.showMessageDialog(null, "Informacion exportada con exito", "Export", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // Cerrar los escritores para liberar los recursos
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+                if (writer2 != null) {
+                    writer2.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }//GEN-LAST:event_btnExportarActionPerformed
 
     private void compile() {
         clearFields();
@@ -966,8 +1030,6 @@ public class Compilador extends javax.swing.JFrame {
             int j = 0;
             List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
 
-
-
             while (j < currentOp.getSizeTokens()) {
                 Token token = currentOp.getTokens().get(j);
                 switch (token.getLexeme()) {
@@ -1237,7 +1299,7 @@ public class Compilador extends javax.swing.JFrame {
         tablaSimbolos.clear();
         diviProd.clear();
         mientrasProd.clear();
-        codigoIntermedio.contadorTemporal=0;
+        codigoIntermedio.contadorTemporal = 0;
         codigoIntermedio.codigoIntermedio.clear();
         codeHasBeenCompiled = false;
     }
@@ -1304,6 +1366,7 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JButton btnAbrir;
     private javax.swing.JButton btnCompilar;
     private javax.swing.JButton btnEjecutar;
+    private javax.swing.JButton btnExportar;
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuardarC;
     private javax.swing.JButton btnNuevo;

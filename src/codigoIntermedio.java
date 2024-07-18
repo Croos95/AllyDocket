@@ -1,6 +1,8 @@
-
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class codigoIntermedio {
 
@@ -26,7 +28,6 @@ public class codigoIntermedio {
         public String imprimirCI() {
             switch (operador) {
                 case "=":
-                    variables.add(resultado + " " + operador + " " + operador1);
                     return resultado + " " + operador + " " + operador1;
                 case "==":
                 case "!=":
@@ -34,18 +35,33 @@ public class codigoIntermedio {
                 case ">=":
                 case "<=":
                 case ">>":
-                    
-                    return"SI " + operador1 + " " + operador + " " + operador2 + " " + resultado;
+                    return "SI" + operador1 + " " + operador + " " + operador2 + " " + resultado;
                 case "Label":
                     return resultado + ":";
                 default:
                     return resultado + " = " + operador1 + " " + operador + " " + operador2;
             }
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            Quadruple quadruple = (Quadruple) obj;
+            return operador.equals(quadruple.operador) &&
+                   operador1.equals(quadruple.operador1) &&
+                   operador2.equals(quadruple.operador2) &&
+                   resultado.equals(quadruple.resultado);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(operador, operador1, operador2, resultado);
+        }
     }
 
     public static List<Quadruple> codigoIntermedio = new ArrayList<>();
-    public static List<String> variables = new ArrayList<>();
+    public static Set<Quadruple> operacionesUnicas = new HashSet<>();
     public static int contadorTemporal = 0;
 
     public String generarTemporal() {
@@ -53,17 +69,18 @@ public class codigoIntermedio {
     }
 
     public void generarCodigoIntermedio(String operacion, String operando1, String operando2, String resultado) {
-
         String operador = obtenerOperador(operacion);
-        codigoIntermedio.add(new Quadruple(operador, operando1, operando2, resultado));
-        System.out.println(operando1 + " " + operador + " " + operando2 + " -> " + resultado);
+        Quadruple nuevaOperacion = new Quadruple(operador, operando1, operando2, resultado);
+
+        if (!operacionesUnicas.contains(nuevaOperacion)) {
+            codigoIntermedio.add(nuevaOperacion);
+            operacionesUnicas.add(nuevaOperacion);
+            System.out.println(operando1 + " " + operador + " " + operando2 + " -> " + resultado);
+        }
     }
 
     public void generarCodigoIntermedioVariables(String operacion, String operando1, String operando2, String resultado) {
-
-        String operador = obtenerOperador(operacion);
-        codigoIntermedio.add(new Quadruple(operador, operando1, operando2, resultado));
-        System.out.println(operando1 + " " + operador + " " + operando2 + " -> " + resultado);
+        generarCodigoIntermedio(operacion, operando1, operando2, resultado);
     }
 
     public String obtenerOperador(String operacion) {
@@ -100,12 +117,10 @@ public class codigoIntermedio {
     public void imprimirCodigoIntermedio() {
         for (Quadruple quad : codigoIntermedio) {
             // Aquí se manda a un textArea en la GUI del frame Compilador
-            if (variables.size() > codigoIntermedio.size() && quad.toString().contains(variables.getFirst())) {
-                break;
-            } else {
+            
                 Compilador.jTextAreaCodigoIntermedio.append(quad.toString() + "\n");
                 Compilador.tablaC.addRow(new Object[]{quad.operador, quad.operador1, quad.operador2, quad.resultado});
-            }
+            
         }
     }
 }

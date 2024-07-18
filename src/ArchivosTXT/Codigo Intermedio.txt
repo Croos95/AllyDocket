@@ -1,11 +1,15 @@
-#num = 29
-#i = 0
-#resultado_mod = 0
+#salario_bruto = 5000
+#tasa_impuesto = 0.20
+#bonificacion = 300
+#salario_neto = 10
+#impuesto = 0
+#salario_antes_bonif = 0
+SI#salario_bruto <= #impuesto GOTO Label1
+T0 = #salario_bruto * #tasa_impuesto
+#impuesto = T0
+T1 = #salario_bruto - #impuesto
+#salario_antes_bonif = T1
+T2 = #salario_antes_bonif + #bonificacion
+#salario_neto = T2
+#bonificacion = #salario_bruto
 Label1:
-T0 = #i + #num
-#resultado_mod = T0
-SI #resultado_mod == #i GOTO Label1
-T1 = #i + #num
-#resultado_mod = T1
-T2 = #i + #num
-#resultado_mod = T2

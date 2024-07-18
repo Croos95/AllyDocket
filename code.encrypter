@@ -1,17 +1,17 @@
 VARIABLES{
 	ENTERO #num = 29;
 	ENTERO #i =0;
-	
+	ENTERO #A=10;
+	ENTERO #B=10;
 	ENTERO #resultado_mod  = 0;
-
 }
 PROCESOS{
-	
-	SI (#resultado_mod == #i) {
-	SUMA[#i,#num]=#resultado_mod;
+	SI(#i<<#A){
+	MULTIPLICACION[#A,#B]=#i;
+		}	
+
+
+	MIENTRAS(#i==#resultado_mod){
+	MULTIPLICACION[#A,#B]=#i;
 	}
-	SUMA[#i,#num]=#resultado_mod;
-
-
-
 }

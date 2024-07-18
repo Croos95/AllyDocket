@@ -60,6 +60,7 @@ public class Compilador extends javax.swing.JFrame {
     private ArrayList<Production> opProd;
     private ArrayList<Production> diviProd;
     private ArrayList<Production> mientrasProd;
+    private ArrayList<Production> siProd = new ArrayList<>();
     private HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
     private HashMap<String, String[]> tablaSimbolos;
@@ -760,6 +761,7 @@ public class Compilador extends javax.swing.JFrame {
         fillTableTokens();
         syntacticAnalysis();
         semanticAnalysis();
+        codigoIntSiyMientras();
         // Imprimir el código intermedio generado
         GCI.imprimirCodigoIntermedio();
         printConsole();
@@ -828,7 +830,7 @@ public class Compilador extends javax.swing.JFrame {
         gramatica.group("imprimir", "IMPRIMIR PARCUAA IDENTIFICADOR (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC FINLINEA", 308, "Error Sintactico {}: Falta parentesis cuadrado de apertura [#,%]");
         gramatica.group("imprimir", "IMPRIMIR PARCUAA  (IDENTIFICADOR|CADENA|NUMERO|NDECIMAL)* PARCUAC", 309, "Error Sintactico {}: Falta FINLINEA [;] [#,%]");
 
-        // Gramática para comparaciones
+        // Gramática para comparaciones         0                                               1                                                                                           2
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", compProd);
         gramatica.group("comparacion", "(IGUALDAD | DESIGUALDAD | MENORQUE | MAYORIGUALQUE | MENORIGUALQUE | MAYORQUE | ANDLOGICO | ORLOGICO | NOTLOGICO) (IDENTIFICADOR | NUMERO)", 100, "Error Sintactico {}: Falta colocar el primer valor [#,%]");
         gramatica.group("comparacion", "(IDENTIFICADOR | NUMERO) (IDENTIFICADOR | NUMERO)", 101, "Error Sintactico {}: Falta colocar la operacion de comparacion [#,%]");
@@ -876,7 +878,8 @@ public class Compilador extends javax.swing.JFrame {
 
         // Definición de estructuras de control
         gramatica.loopForFunExecUntilChangeNotDetected(() -> {
-            gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC");
+            //0   1        2         3     4                           5                            6
+            gramatica.group("estructura_si", "SI PARA (comparacion)? PARC CORA (operaciones | estructura_si | estructura_mientras)* CORC", siProd);
         });
 
         // Estructura SI
@@ -1026,126 +1029,11 @@ public class Compilador extends javax.swing.JFrame {
         }//if
     }
 
-    private void division0yOperaciones() {
-        if (!opProd.isEmpty()) {
-            Production currentOp = opProd.get(0);
-            int j = 0;
-            List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
-
-            while (j < currentOp.getSizeTokens()) {
-                Token token = currentOp.getTokens().get(j);
-                switch (token.getLexeme()) {
-                    case "DIVISION":
-                    case "MULTIPLICACION":
-                    case "SUMA":
-                    case "RESTA":
-                        boolean esDecimal = false;
-                        int k = j + 2;
-                        boolean errorEncontrado = false;
-                        String operacion = token.getLexeme();
-
-                        while (k < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(k).equals("ASIGNACION")) {
-                            if (valoresValidos.contains(currentOp.lexicalCompRank(k))) {
-                                double valorOperando = getValor(currentOp.lexemeRank(k), currentOp.lexicalCompRank(k), currentOp);
-                                if (valorOperando == Double.MIN_VALUE) {
-                                    errorEncontrado = true;
-                                    break;
-                                }
-                                String am = identificadores.getOrDefault(currentOp.lexemeRank(k), "");
-                                String am2 = identificadores.getOrDefault(currentOp.lexemeRank(k + 2), "");
-                                if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
-                                        && currentOp.lexicalCompRank(k).equals("NUMERO")
-                                        && currentOp.lexicalCompRank(k + 2).equals("NDECIMAL")) {
-                                    errors.add(new ErrorLSSL(4, "Error semántico {}: Operación de tipos incompatibles [#,%] En la operación =[ " + operacion + "]", currentOp, false));
-                                    errorEncontrado = true;
-                                    break;
-                                }
-
-                                if (currentOp.lexicalCompRank(k).equals("NDECIMAL") || am.equals("DECIMAL")) {
-                                    esDecimal = true;
-                                }
-
-                                if (operacion.equals("DIVISION") && valorOperando == 0) {
-                                    errors.add(new ErrorLSSL(5, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
-                                    errorEncontrado = true;
-                                    break;
-                                }
-                                String operando = currentOp.lexemeRank(k);
-                                operandos.add(operando);
-                            }
-                            k++;
-                        }
-
-                        if (!errorEncontrado) {
-                            String resultado = currentOp.lexemeRank(k + 1);
-                            String temp = operandos.get(0);
-
-                            for (int i = 1; i < operandos.size(); i++) {
-                                String operando = operandos.get(i);
-                                String nuevoTemp = GCI.generarTemporal();
-                                GCI.generarCodigoIntermedio(operacion, temp, operando, nuevoTemp);
-                                temp = nuevoTemp;
-                            }
-                            GCI.generarCodigoIntermedio("ASIGNAR", temp, "", resultado);
-                            operandos.clear();
-                            String datoAlm = identificadores.get(currentOp.lexemeRank(k + 1));
-                            if (datoAlm.equals("ENTERO") && esDecimal) {
-                                errors.add(new ErrorLSSL(6, "Error semántico {}: DECIMAL no se puede asignar a ENTERO [#,%][ " + operacion + "]", currentOp, false));
-                            } else if (datoAlm.equals("DECIMAL") && !esDecimal) {
-                                errors.add(new ErrorLSSL(6, "Error semántico {}: ENTERO no se puede asignar a DECIMAL [#,%][ " + operacion + "]", currentOp, false));
-                            }
-                        }
-                        j = k + 2;
-                        break;
-
-                    case "ASIGNAR":
-                        String variableDestino = currentOp.lexemeRank(j + 2);
-                        String variableOrigen = currentOp.lexemeRank(j + 5);
-                        GCI.generarCodigoIntermedio("ASIGNAR", variableOrigen, "", variableDestino);
-                        j = j + 7;  // Ajustar el índice para saltar la operación de asignación completa
-                        break;
-
-                    case "IMPRIMIR":
-                        System.out.println("IMPRIMIR");
-                        j++;  // Incrementar `j` para avanzar al siguiente token
-                        break;
-
-                    default:
-                        j++;
-                        break;
-                }
-            }
-
-        }
-    }
-
-    private double getValor(String lexema, String tipo, Production currentOp) {
-        try {
-            switch (tipo) {
-                case "IDENTIFICADOR":
-                    String[] datos = tablaSimbolos.get(lexema);
-                    if (datos == null) {
-                        errors.add(new ErrorLSSL(3, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-                        return Double.MIN_VALUE;
-                    }
-                    return Double.parseDouble(datos[1]);
-                case "NUMERO":
-                    return Integer.parseInt(lexema);
-                case "NDECIMAL":
-                    return Double.parseDouble(lexema);
-                default:
-                    return Double.MIN_VALUE;
-            }
-        } catch (NumberFormatException e) {
-            errors.add(new ErrorLSSL(6, "Error semántico {}: Formato de número inválido [#,%]", currentOp, false));
-            return Double.MIN_VALUE;
-        }
-    }
 
     private void tiposIncommpatibles() {
         if (!compProd.isEmpty()) {
             int i = 0;
-            int etiqueta = 0;
+
             for (Production comp : compProd) {
                 i++;
                 String comparador1 = comp.lexemeRank(0);
@@ -1174,108 +1062,66 @@ public class Compilador extends javax.swing.JFrame {
                     try {
                         switch (operador) {
                             case "==":
+
                                 if (!valor1Real.equals(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
-                                   etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
-                                   etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
-
                                 }
                                 break;
                             case "!=":
                                 if (valor1Real.equals(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
-                                    
-                                    
                                 }
                                 break;
                             case "<<":
                                 if (Float.parseFloat(valor1Real) >= Float.parseFloat(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
+
                                 }
                                 break;
                             case ">>":
                                 if (Float.parseFloat(valor1Real) <= Float.parseFloat(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
-                                   etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+
                                 }
                                 break;
                             case "<=":
                                 if (Float.parseFloat(valor1Real) > Float.parseFloat(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+
                                 }
                                 break;
                             case ">=":
                                 if (Float.parseFloat(valor1Real) < Float.parseFloat(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
-                                    etiqueta++;
-                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
-                                    division0yOperaciones();
-                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 }
                                 break;
                             default:
@@ -1287,24 +1133,222 @@ public class Compilador extends javax.swing.JFrame {
                     }
                 }
             }
-             division0yOperaciones();
         }
-        division0yOperaciones();
 
     }
 
-    //-------------------------------------------------------------------------------------------
-// Método para actualizar la JTable
-    private void actualizarJTable(String identificador, String[] datosActualizados) {
-        for (int row = 0; row < tablaS.getRowCount(); row++) {
-            if (tablaS.getValueAt(row, 0).equals(identificador)) {
-                tablaS.setValueAt(datosActualizados[0], row, 1);
-                tablaS.setValueAt(datosActualizados[1], row, 2);
+public void codigoIntSiyMientras() {
+    int etiqueta = 0;
+    if (!siProd.isEmpty()) {
+        for (Production prod : siProd) {
+            String operando1 = prod.lexemeRank(2);
+            String operador = prod.lexemeRank(3);
+            String operando2 = prod.lexemeRank(4);
+            etiqueta++;
+            String etiquetaFin = "Label" + etiqueta;
+            switch (operador) {
+                case "==":
+                    GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
+                    break;
+                case "!=":
+                    GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
+                    break;
+                case "<<":
+                    GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
+                    break;
+                case ">>":
+                    GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
+                    break;
+                case "<=":
+                    GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO " + etiquetaFin);
+                    break;
+                case ">=":
+                    GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO " + etiquetaFin);
+                    break;
+            }
+            // Generar operaciones dentro del bloque SI
+            generarOperacionesEnBloque(prod);
+            GCI.generarCodigoIntermedio("LABEL", "", "", etiquetaFin);
+        }
+    }
+    if (!mientrasProd.isEmpty()) {
+        for (Production prod : mientrasProd) {
+            String operando1 = prod.lexemeRank(2);
+            String operador = prod.lexemeRank(3);
+            String operando2 = prod.lexemeRank(4);
+            int etiquetaInicio = etiqueta;
+            int etiquetaFin = etiqueta + 1;
+            etiqueta += 2;
+
+            GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaInicio);
+            switch (operador) {
+                case "==":
+                    GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
+                    break;
+                case "!=":
+                    GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
+                    break;
+                case "<<":
+                    GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                    break;
+                case ">>":
+                    GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                    break;
+                case "<=":
+                    GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                    break;
+                case ">=":
+                    GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                    break;
+            }
+            // Generar operaciones dentro del bloque MIENTRAS
+            generarOperacionesEnBloque(prod);
+            GCI.generarCodigoIntermedio("GOTO", "", "", "Label" + etiquetaInicio);
+            GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaFin);
+        }
+    }
+    for (Production prod : mainProd) {
+        generarOperaciones(prod);
+    }
+}
+
+private void generarOperacionesEnBloque(Production bloque) {
+    for (Token token : bloque.getTokens()) {
+        switch (token.getLexeme()) {
+            case "DIVISION":
+            case "MULTIPLICACION":
+            case "SUMA":
+            case "RESTA":
+                generarOperacion(bloque, token);
+                break;
+            case "ASIGNAR":
+                generarAsignacion(bloque, token);
+                break;
+            case "IMPRIMIR":
+                generarImprimir(bloque, token);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+private void generarOperacion(Production currentOp, Token token) {
+    List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
+    boolean esDecimal = false;
+    int j = currentOp.getTokens().indexOf(token) + 2;
+    boolean errorEncontrado = false;
+    String operacion = token.getLexeme();
+
+    while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
+        if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
+            double valorOperando = getValor(currentOp.lexemeRank(j), currentOp.lexicalCompRank(j), currentOp);
+            if (valorOperando == Double.MIN_VALUE) {
+                errorEncontrado = true;
                 break;
             }
+            String am = identificadores.getOrDefault(currentOp.lexemeRank(j), "");
+            String am2 = identificadores.getOrDefault(currentOp.lexemeRank(j + 2), "");
+            if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
+                    && currentOp.lexicalCompRank(j).equals("NUMERO")
+                    && currentOp.lexicalCompRank(j + 2).equals("NDECIMAL")) {
+                errors.add(new ErrorLSSL(4, "Error semántico {}: Operación de tipos incompatibles [#,%] En la operación =[ " + operacion + "]", currentOp, false));
+                errorEncontrado = true;
+                break;
+            }
+
+            if (currentOp.lexicalCompRank(j).equals("NDECIMAL") || am.equals("DECIMAL")) {
+                esDecimal = true;
+            }
+
+            if (operacion.equals("DIVISION") && valorOperando == 0) {
+                errors.add(new ErrorLSSL(5, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
+                errorEncontrado = true;
+                break;
+            }
+            String operando = currentOp.lexemeRank(j);
+            operandos.add(operando);
         }
+        j++;
     }
 
+    if (!errorEncontrado) {
+        String resultado = currentOp.lexemeRank(j + 1);
+        String temp = operandos.get(0);
+
+        for (int i = 1; i < operandos.size(); i++) {
+            String operando = operandos.get(i);
+            String nuevoTemp = GCI.generarTemporal();
+            GCI.generarCodigoIntermedio(operacion, temp, operando, nuevoTemp);
+            temp = nuevoTemp;
+        }
+        GCI.generarCodigoIntermedio("ASIGNAR", temp, "", resultado);
+        operandos.clear();
+        String datoAlm = identificadores.get(currentOp.lexemeRank(j + 1));
+        if (datoAlm.equals("ENTERO") && esDecimal) {
+            errors.add(new ErrorLSSL(6, "Error semántico {}: DECIMAL no se puede asignar a ENTERO [#,%][ " + operacion + "]", currentOp, false));
+        } else if (datoAlm.equals("DECIMAL") && !esDecimal) {
+            errors.add(new ErrorLSSL(6, "Error semántico {}: ENTERO no se puede asignar a DECIMAL [#,%][ " + operacion + "]", currentOp, false));
+        }
+    }
+}
+
+private void generarAsignacion(Production currentOp, Token token) {
+    int j = currentOp.getTokens().indexOf(token);
+    String variableDestino = currentOp.lexemeRank(j + 2);
+    String variableOrigen = currentOp.lexemeRank(j + 5);
+    GCI.generarCodigoIntermedio("ASIGNAR", variableOrigen, "", variableDestino);
+}
+
+private void generarImprimir(Production currentOp, Token token) {
+    System.out.println("IMPRIMIR");
+    // Implementar lógica para la operación IMPRIMIR si es necesario
+}
+
+private double getValor(String lexema, String tipo, Production currentOp) {
+    try {
+        switch (tipo) {
+            case "IDENTIFICADOR":
+                String[] datos = tablaSimbolos.get(lexema);
+                if (datos == null) {
+                    errors.add(new ErrorLSSL(3, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                    return Double.MIN_VALUE;
+                }
+                return Double.parseDouble(datos[1]);
+            case "NUMERO":
+                return Integer.parseInt(lexema);
+            case "NDECIMAL":
+                return Double.parseDouble(lexema);
+            default:
+                return Double.MIN_VALUE;
+        }
+    } catch (NumberFormatException e) {
+        errors.add(new ErrorLSSL(6, "Error semántico {}: Formato de número inválido [#,%]", currentOp, false));
+        return Double.MIN_VALUE;
+    }
+}
+
+private void generarOperaciones(Production prod) {
+    for (Token token : prod.getTokens()) {
+        switch (token.getLexeme()) {
+            case "DIVISION":
+            case "MULTIPLICACION":
+            case "SUMA":
+            case "RESTA":
+                generarOperacion(prod, token);
+                break;
+            case "ASIGNAR":
+                generarAsignacion(prod, token);
+                break;
+            case "IMPRIMIR":
+                generarImprimir(prod, token);
+                break;
+            default:
+                break;
+        }
+    }
+}
+ 
     private void fillTableTokens() {
         tokens.forEach(token -> {
             Object[] data = new Object[]{token.getLexicalComp(), token.getLexeme(), "[" + token.getLine() + ", " + token.getColumn() + "]"};

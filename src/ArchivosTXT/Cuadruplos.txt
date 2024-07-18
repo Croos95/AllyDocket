@@ -1,12 +1,16 @@
 Operador	Arg1	Arg2	Resultado	
-=	29		#num	
-=	0		#i	
-=	0		#resultado_mod	
+=	5000		#salario_bruto	
+=	0.20		#tasa_impuesto	
+=	300		#bonificacion	
+=	10		#salario_neto	
+=	0		#impuesto	
+=	0		#salario_antes_bonif	
+<=	#salario_bruto	#impuesto	GOTO Label1	
+*	#salario_bruto	#tasa_impuesto	T0	
+=	T0		#impuesto	
+-	#salario_bruto	#impuesto	T1	
+=	T1		#salario_antes_bonif	
++	#salario_antes_bonif	#bonificacion	T2	
+=	T2		#salario_neto	
+=	#salario_bruto		#bonificacion	
 Label			Label1	
-+	#i	#num	T0	
-=	T0		#resultado_mod	
-==	#resultado_mod	#i	GOTO Label1	
-+	#i	#num	T1	
-=	T1		#resultado_mod	
-+	#i	#num	T2	
-=	T2		#resultado_mod	

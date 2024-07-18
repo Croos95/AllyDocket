@@ -958,7 +958,7 @@ public class Compilador extends javax.swing.JFrame {
                 String[] getDatos = tablaSimbolos.get(id.lexemeRank(1));
                 tablaS.addRow(new Object[]{id.lexemeRank(1), getDatos[0], getDatos[1]});//tambien se mandan a la tabla en la GUI
                 //
-                GCI.generarCodigoIntermedioVariables("ASIGNAR", datos[1], "", id.lexemeRank(1));//GENERAR CUADRUPLOS
+                GCI.generarCodigoIntermedio("ASIGNAR", datos[1], "", id.lexemeRank(1));//GENERAR CUADRUPLOS
                 //
                 System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
 

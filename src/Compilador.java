@@ -760,6 +760,8 @@ public class Compilador extends javax.swing.JFrame {
         fillTableTokens();
         syntacticAnalysis();
         semanticAnalysis();
+        // Imprimir el código intermedio generado
+        GCI.imprimirCodigoIntermedio();
         printConsole();
         codeHasBeenCompiled = true;
     }
@@ -953,7 +955,7 @@ public class Compilador extends javax.swing.JFrame {
                 String[] getDatos = tablaSimbolos.get(id.lexemeRank(1));
                 tablaS.addRow(new Object[]{id.lexemeRank(1), getDatos[0], getDatos[1]});//tambien se mandan a la tabla en la GUI
                 //
-                GCI.generarCodigoIntermedio("ASIGNAR", datos[1], "", id.lexemeRank(1));//GENERAR CUADRUPLOS
+                GCI.generarCodigoIntermedioVariables("ASIGNAR", datos[1], "", id.lexemeRank(1));//GENERAR CUADRUPLOS
                 //
                 System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
 
@@ -1017,7 +1019,7 @@ public class Compilador extends javax.swing.JFrame {
                 }//if
 
             }//for
-            division0yOperaciones();
+
             tiposIncommpatibles();
             System.out.println("EJECUTADO =" + contador);
             contador++;
@@ -1114,8 +1116,6 @@ public class Compilador extends javax.swing.JFrame {
                 }
             }
 
-            // Imprimir el código intermedio generado
-            GCI.imprimirCodigoIntermedio();
         }
     }
 
@@ -1143,95 +1143,139 @@ public class Compilador extends javax.swing.JFrame {
     }
 
     private void tiposIncommpatibles() {
-        //comparacion de tipos Incompatibles-------------------------------------------------------------------------------
         if (!compProd.isEmpty()) {
-            // Recorrer la producción de comparacion 
             int i = 0;
+            int etiqueta = 0;
             for (Production comp : compProd) {
                 i++;
-                //EJEMPLO ILUSTRATIVO ---> #id1 == #id2
-                String comparador1 = comp.lexemeRank(0);//#id1
-                String operador = comp.lexemeRank(1);// operador de comparación (==, !=, <, >, <=, >=)
-                String comparador2 = comp.lexemeRank(2);//#id2
-                // Verificar si ambos comparadores están en la tabla de identificadores
+                String comparador1 = comp.lexemeRank(0);
+                String operador = comp.lexemeRank(1);
+                String operadorLexema = comp.lexicalCompRank(1);
+                String comparador2 = comp.lexemeRank(2);
+
                 if (!identificadores.containsKey(comparador1) || !identificadores.containsKey(comparador2)) {
                     errors.add(new ErrorLSSL(3, "Error semántico {}: uno de los identificadores no está declarado [#,%] = [" + comparador1 + "] o [" + comparador2 + "]", comp, false));
-                    continue; // Saltar esta comparación si uno de los identificadores no está declarado
+                    continue;
                 }
 
-                // Obtener los tipos de datos de los comparadores
                 String tipo1 = identificadores.get(comparador1);
                 String tipo2 = identificadores.get(comparador2);
 
-                // si #id1 --> tipo de dato != #id2 --> tipo de dato
                 if (!tipo1.equals(tipo2)) {
                     errors.add(new ErrorLSSL(7, "Error semántico {}: comparacion de tipos Incompatibles [#,%] = [" + tipo1 + "] y [" + tipo2 + "]", comp, false));
                 } else {
-                    // Obtener los valores reales de los comparadores
                     String[] valor1 = tablaSimbolos.get(comparador1);
                     String[] valor2 = tablaSimbolos.get(comparador2);
                     String valor1Real = valor1[1];
                     String valor2Real = valor2[1];
                     String[] valorIF = {"BOOLEANO", "verdadero"};
                     String[] valorIFalse = {"BOOLEANO", "falso"};
-                    // Condicion No Booleana--------------------------------------------------------------------------------------------------
+
                     try {
                         switch (operador) {
                             case "==":
                                 if (!valor1Real.equals(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                   etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                   etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+
                                 }
                                 break;
                             case "!=":
                                 if (valor1Real.equals(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+                                    
+                                    
                                 }
                                 break;
                             case "<<":
                                 if (Float.parseFloat(valor1Real) >= Float.parseFloat(valor2Real)) {
-
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
                                 }
                                 break;
                             case ">>":
                                 if (Float.parseFloat(valor1Real) <= Float.parseFloat(valor2Real)) {
-
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                   etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 }
                                 break;
                             case "<=":
                                 if (Float.parseFloat(valor1Real) > Float.parseFloat(valor2Real)) {
-
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 }
                                 break;
                             case ">=":
                                 if (Float.parseFloat(valor1Real) < Float.parseFloat(valor2Real)) {
                                     tablaSimbolos.put(comp.getName() + i, valorIFalse);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIFalse[0], valorIFalse[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 } else {
                                     tablaSimbolos.put(comp.getName() + i, valorIF);
                                     tablaS.addRow(new Object[]{comp.getName() + i, valorIF[0], valorIF[1]});
+                                    etiqueta++;
+                                    GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiqueta);
+                                    division0yOperaciones();
+                                    GCI.generarCodigoIntermedio(operadorLexema, comparador1, comparador2, "GOTO Label" + etiqueta);
                                 }
                                 break;
                             default:
@@ -1241,10 +1285,12 @@ public class Compilador extends javax.swing.JFrame {
                     } catch (NumberFormatException e) {
                         errors.add(new ErrorLSSL(6, "Error semántico {}: formato de número inválido [#,%]", comp, false));
                     }
-                    //Condicion No Booleana--------------------------------------------------------------------------------------------------
                 }
-            }//For
-        }//If
+            }
+             division0yOperaciones();
+        }
+        division0yOperaciones();
+
     }
 
     //-------------------------------------------------------------------------------------------
@@ -1299,6 +1345,7 @@ public class Compilador extends javax.swing.JFrame {
         tablaSimbolos.clear();
         diviProd.clear();
         mientrasProd.clear();
+        jTextAreaCodigoIntermedio.setText("");
         codigoIntermedio.contadorTemporal = 0;
         codigoIntermedio.codigoIntermedio.clear();
         codeHasBeenCompiled = false;

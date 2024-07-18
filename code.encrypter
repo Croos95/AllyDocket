@@ -1,17 +1,17 @@
-VARIABLES {
-    DECIMAL #salario_bruto = 5000;
-    DECIMAL #tasa_impuesto = 0.20;
-    DECIMAL #bonificacion = 300;
-    DECIMAL #salario_neto=0;
-   DECIMAL #impuesto=0;
-  DECIMAL #salario_antes_bonif=0;
-}
+VARIABLES{
+	ENTERO #num = 29;
+	ENTERO #i =0;
+	
+	ENTERO #resultado_mod  = 0;
 
-PROCESOS {
-    MULTIPLICACION [#salario_bruto, #tasa_impuesto] = #impuesto;
-    RESTA [#salario_bruto, #impuesto] = #salario_antes_bonif;
-    SUMA [#salario_antes_bonif, #bonificacion] = #salario_neto;
-ASIGNAR [#bonificacion] = #salario_bruto;
-IMPRIMIR [#salario_bruto]
+}
+PROCESOS{
+	
+	SI (#resultado_mod == #i) {
+	SUMA[#i,#num]=#resultado_mod;
+	}
+	SUMA[#i,#num]=#resultado_mod;
+
+
 
 }

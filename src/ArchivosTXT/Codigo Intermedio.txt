@@ -1,13 +1,11 @@
-= , 5000 , #salario_bruto
-= , 0.20 , #tasa_impuesto
-= , 300 , #bonificacion
-= , 0 , #salario_neto
-= , 0 , #impuesto
-= , 0 , #salario_antes_bonif
-* , #salario_bruto , #tasa_impuesto , T0
-= , T0 , #impuesto
-- , #salario_bruto , #impuesto , T1
-= , T1 , #salario_antes_bonif
-+ , #salario_antes_bonif , #bonificacion , T2
-= , T2 , #salario_neto
-= , #salario_bruto , #bonificacion
+#num = 29
+#i = 0
+#resultado_mod = 0
+Label1:
+T0 = #i + #num
+#resultado_mod = T0
+SI #resultado_mod == #i GOTO Label1
+T1 = #i + #num
+#resultado_mod = T1
+T2 = #i + #num
+#resultado_mod = T2

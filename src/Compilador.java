@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,6 +60,7 @@ public class Compilador extends javax.swing.JFrame {
     private ArrayList<Production> asigProdConID;
     private ArrayList<Production> opProd;
     private ArrayList<Production> diviProd;
+    private ArrayList<String> operaciones;
     private ArrayList<Production> mientrasProd;
     private ArrayList<Production> siProd = new ArrayList<>();
     private HashMap<String, String> identificadores;
@@ -67,8 +69,10 @@ public class Compilador extends javax.swing.JFrame {
     HashMap<String, String> identDataType = new HashMap<>();
     codigoIntermedio GCI = new codigoIntermedio();
     DefaultTableModel tablaS;
+    public  Boolean opRealizada =false;
     public static DefaultTableModel tablaC;
     List<String> operandos = new ArrayList<>();
+    Set<String> operacionesGeneradas = new HashSet<>();
     Grammar gramatica;
 
     /**
@@ -125,6 +129,7 @@ public class Compilador extends javax.swing.JFrame {
         mientrasProd = new ArrayList<>();
         tablaS = (DefaultTableModel) TblSimbolos.getModel();
         tablaC = (DefaultTableModel) TablaCuadruplos.getModel();
+        operaciones = new ArrayList<>();
         Functions.setAutocompleterJTextComponent(new String[]{"VAR { \n  \n }"}, jtpCode, () -> {
             timerKeyReleased.restart();
         });
@@ -1024,11 +1029,11 @@ public class Compilador extends javax.swing.JFrame {
             }//for
 
             tiposIncommpatibles();
+            verificacionSemantica(mainProd.get(0));
             System.out.println("EJECUTADO =" + contador);
             contador++;
         }//if
     }
-
 
     private void tiposIncommpatibles() {
         if (!compProd.isEmpty()) {
@@ -1137,218 +1142,285 @@ public class Compilador extends javax.swing.JFrame {
 
     }
 
-public void codigoIntSiyMientras() {
-    int etiqueta = 0;
-    if (!siProd.isEmpty()) {
-        for (Production prod : siProd) {
-            String operando1 = prod.lexemeRank(2);
-            String operador = prod.lexemeRank(3);
-            String operando2 = prod.lexemeRank(4);
-            etiqueta++;
-            String etiquetaFin = "Label" + etiqueta;
-            switch (operador) {
-                case "==":
-                    GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
-                    break;
-                case "!=":
-                    GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
-                    break;
-                case "<<":
-                    GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
-                    break;
-                case ">>":
-                    GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
-                    break;
-                case "<=":
-                    GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO " + etiquetaFin);
-                    break;
-                case ">=":
-                    GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO " + etiquetaFin);
-                    break;
+     public void codigoIntSiyMientras() {
+        int etiqueta = 0;
+        if (!siProd.isEmpty()) {
+            for (Production prod : siProd) {
+                String operando1 = prod.lexemeRank(2);
+                String operador = prod.lexemeRank(3);
+                String operando2 = prod.lexemeRank(4);
+                etiqueta++;
+                String etiquetaFin = "Label" + etiqueta;
+                switch (operador) {
+                    case "==":
+                        GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
+                        break;
+                    case "!=":
+                        GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
+                        break;
+                    case "<<":
+                        GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
+                        break;
+                    case ">>":
+                        GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
+                        break;
+                    case "<=":
+                        GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO " + etiquetaFin);
+                        break;
+                    case ">=":
+                        GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO " + etiquetaFin);
+                        break;
+                }
+                // Generar operaciones dentro del bloque SI
+                verificacionSemanticaEnBloque(prod);
+                generacionCodigoIntermedioEnBloque(prod);
+                GCI.generarCodigoIntermedio("LABEL", "", "", etiquetaFin);
             }
-            // Generar operaciones dentro del bloque SI
-            generarOperacionesEnBloque(prod);
-            GCI.generarCodigoIntermedio("LABEL", "", "", etiquetaFin);
+        }
+        if (!mientrasProd.isEmpty()) {
+            for (Production prod : mientrasProd) {
+                String operando1 = prod.lexemeRank(2);
+                String operador = prod.lexemeRank(3);
+                String operando2 = prod.lexemeRank(4);
+                int etiquetaInicio = etiqueta;
+                int etiquetaFin = etiqueta + 1;
+                etiqueta += 2;
+
+                GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaInicio);
+                
+                switch (operador) {
+                    case "==":
+                        GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
+                        break;
+                    case "!=":
+                        GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
+                        break;
+                    case "<<":
+                        GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                        break;
+                    case ">>":
+                        GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                        break;
+                    case "<=":
+                        GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                        break;
+                    case ">=":
+                        GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                        break;
+                }
+                // Generar operaciones dentro del bloque MIENTRAS
+                verificacionSemanticaEnBloque(prod);
+                generacionCodigoIntermedioEnBloque(prod);
+                GCI.generarCodigoIntermedio("LABEL", "", "", "GOTO Label" + etiquetaInicio);
+                GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaFin);
+            }
+        }
+        for (Production prod : mainProd) {
+            verificacionSemantica(prod);
+            generacionCodigoIntermedio(prod);
         }
     }
-    if (!mientrasProd.isEmpty()) {
-        for (Production prod : mientrasProd) {
-            String operando1 = prod.lexemeRank(2);
-            String operador = prod.lexemeRank(3);
-            String operando2 = prod.lexemeRank(4);
-            int etiquetaInicio = etiqueta;
-            int etiquetaFin = etiqueta + 1;
-            etiqueta += 2;
 
-            GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaInicio);
-            switch (operador) {
-                case "==":
-                    GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
+    private void verificacionSemantica(Production prod) {
+        for (Token token : prod.getTokens()) {
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                case "MULTIPLICACION":
+                case "SUMA":
+                case "RESTA":
+                    verificarOperacion(prod, token);
                     break;
-                case "!=":
-                    GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
+                case "ASIGNAR":
+                    verificarAsignacion(prod, token);
                     break;
-                case "<<":
-                    GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
-                    break;
-                case ">>":
-                    GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
-                    break;
-                case "<=":
-                    GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
-                    break;
-                case ">=":
-                    GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
+                default:
                     break;
             }
-            // Generar operaciones dentro del bloque MIENTRAS
-            generarOperacionesEnBloque(prod);
-            GCI.generarCodigoIntermedio("GOTO", "", "", "Label" + etiquetaInicio);
-            GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaFin);
         }
     }
-    for (Production prod : mainProd) {
-        generarOperaciones(prod);
-    }
-}
 
-private void generarOperacionesEnBloque(Production bloque) {
-    for (Token token : bloque.getTokens()) {
-        switch (token.getLexeme()) {
-            case "DIVISION":
-            case "MULTIPLICACION":
-            case "SUMA":
-            case "RESTA":
-                generarOperacion(bloque, token);
-                break;
-            case "ASIGNAR":
-                generarAsignacion(bloque, token);
-                break;
-            case "IMPRIMIR":
-                generarImprimir(bloque, token);
-                break;
-            default:
-                break;
+    private void generacionCodigoIntermedio(Production prod) {
+        for (Token token : prod.getTokens()) {
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                case "MULTIPLICACION":
+                case "SUMA":
+                case "RESTA":
+                    generarOperacion(prod, token, operacionesGeneradas);
+                    break;
+                case "ASIGNAR":
+                    generarAsignacion(prod, token);
+                    break;
+                case "IMPRIMIR":
+                    generarImprimir(prod, token);
+                    break;
+                default:
+                    break;
+            }
         }
     }
-}
 
-private void generarOperacion(Production currentOp, Token token) {
-    List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
-    boolean esDecimal = false;
-    int j = currentOp.getTokens().indexOf(token) + 2;
-    boolean errorEncontrado = false;
-    String operacion = token.getLexeme();
-
-    while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
-        if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
-            double valorOperando = getValor(currentOp.lexemeRank(j), currentOp.lexicalCompRank(j), currentOp);
-            if (valorOperando == Double.MIN_VALUE) {
-                errorEncontrado = true;
-                break;
+    private void verificacionSemanticaEnBloque(Production bloque) {
+        for (Token token : bloque.getTokens()) {
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                case "MULTIPLICACION":
+                case "SUMA":
+                case "RESTA":
+                    verificarOperacion(bloque, token);
+                    break;
+                case "ASIGNAR":
+                    verificarAsignacion(bloque, token);
+                    break;
+                default:
+                    break;
             }
-            String am = identificadores.getOrDefault(currentOp.lexemeRank(j), "");
-            String am2 = identificadores.getOrDefault(currentOp.lexemeRank(j + 2), "");
-            if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
-                    && currentOp.lexicalCompRank(j).equals("NUMERO")
-                    && currentOp.lexicalCompRank(j + 2).equals("NDECIMAL")) {
-                errors.add(new ErrorLSSL(4, "Error semántico {}: Operación de tipos incompatibles [#,%] En la operación =[ " + operacion + "]", currentOp, false));
-                errorEncontrado = true;
-                break;
-            }
-
-            if (currentOp.lexicalCompRank(j).equals("NDECIMAL") || am.equals("DECIMAL")) {
-                esDecimal = true;
-            }
-
-            if (operacion.equals("DIVISION") && valorOperando == 0) {
-                errors.add(new ErrorLSSL(5, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
-                errorEncontrado = true;
-                break;
-            }
-            String operando = currentOp.lexemeRank(j);
-            operandos.add(operando);
         }
-        j++;
     }
 
-    if (!errorEncontrado) {
+    private void generacionCodigoIntermedioEnBloque(Production bloque) {
+        for (Token token : bloque.getTokens()) {
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                case "MULTIPLICACION":
+                case "SUMA":
+                case "RESTA":
+                    generarOperacion(bloque, token, operacionesGeneradas);
+                    break;
+                case "ASIGNAR":
+                    generarAsignacion(bloque, token);
+                    break;
+                case "IMPRIMIR":
+                    generarImprimir(bloque, token);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void verificarOperacion(Production currentOp, Token token) {
+        List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
+        boolean esDecimal = false;
+        int j = currentOp.getTokens().indexOf(token) + 2;
+        boolean errorEncontrado = false;
+        String operacion = token.getLexeme();
+
+        while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
+            if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
+                double valorOperando = getValor(currentOp.lexemeRank(j), currentOp.lexicalCompRank(j), currentOp);
+                if (valorOperando == Double.MIN_VALUE) {
+                    errorEncontrado = true;
+                    break;
+                }
+                String am = identificadores.getOrDefault(currentOp.lexemeRank(j), "");
+                String am2 = identificadores.getOrDefault(currentOp.lexemeRank(j + 2), "");
+                if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
+                        && currentOp.lexicalCompRank(j).equals("NUMERO")
+                        && currentOp.lexicalCompRank(j + 2).equals("NDECIMAL")) {
+                    errors.add(new ErrorLSSL(4, "Error semántico {}: Operación de tipos incompatibles [#,%] En la operación =[ " + operacion + "]", currentOp, false));
+                    errorEncontrado = true;
+                    break;
+                }
+
+                if (currentOp.lexicalCompRank(j).equals("NDECIMAL") || am.equals("DECIMAL")) {
+                    esDecimal = true;
+                }
+
+                if (operacion.equals("DIVISION") && valorOperando == 0) {
+                    errors.add(new ErrorLSSL(5, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
+                    errorEncontrado = true;
+                    break;
+                }
+            }
+            j++;
+        }
+    }
+
+    private void generarOperacion(Production currentOp, Token token, Set<String> operacionesGeneradas) {
+        List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
+        boolean esDecimal = false;
+        int j = currentOp.getTokens().indexOf(token) + 2;
+        String operacion = token.getLexeme();
+
+        while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
+            if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
+                String operando = currentOp.lexemeRank(j);
+                operandos.add(operando);
+            }
+            j++;
+        }
+
         String resultado = currentOp.lexemeRank(j + 1);
         String temp = operandos.get(0);
 
         for (int i = 1; i < operandos.size(); i++) {
             String operando = operandos.get(i);
             String nuevoTemp = GCI.generarTemporal();
-            GCI.generarCodigoIntermedio(operacion, temp, operando, nuevoTemp);
-            temp = nuevoTemp;
+            String operacionString = operacion + temp + operando;
+            if (!operacionesGeneradas.contains(operacionString)) {
+                GCI.generarCodigoIntermedio(operacion, temp, operando, nuevoTemp);
+                temp = nuevoTemp;
+                operacionesGeneradas.add(operacionString);
+            } else {
+                opRealizada = true;
+            }
         }
-        GCI.generarCodigoIntermedio("ASIGNAR", temp, "", resultado);
+        if (!opRealizada) {
+            GCI.generarCodigoIntermedio("ASIGNAR", temp, "", resultado);
+            operandos.clear();
+        }
         operandos.clear();
-        String datoAlm = identificadores.get(currentOp.lexemeRank(j + 1));
-        if (datoAlm.equals("ENTERO") && esDecimal) {
-            errors.add(new ErrorLSSL(6, "Error semántico {}: DECIMAL no se puede asignar a ENTERO [#,%][ " + operacion + "]", currentOp, false));
-        } else if (datoAlm.equals("DECIMAL") && !esDecimal) {
-            errors.add(new ErrorLSSL(6, "Error semántico {}: ENTERO no se puede asignar a DECIMAL [#,%][ " + operacion + "]", currentOp, false));
+    }
+
+    private void verificarAsignacion(Production currentOp, Token token) {
+        int j = currentOp.getTokens().indexOf(token);
+        String variableDestino = currentOp.lexemeRank(j + 2);
+        String variableOrigen = currentOp.lexemeRank(j + 5);
+        if (!identificadores.containsKey(variableOrigen)) {
+            errors.add(new ErrorLSSL(3, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
         }
     }
-}
 
-private void generarAsignacion(Production currentOp, Token token) {
-    int j = currentOp.getTokens().indexOf(token);
-    String variableDestino = currentOp.lexemeRank(j + 2);
-    String variableOrigen = currentOp.lexemeRank(j + 5);
-    GCI.generarCodigoIntermedio("ASIGNAR", variableOrigen, "", variableDestino);
-}
+    private void generarAsignacion(Production currentOp, Token token) {
+        int j = currentOp.getTokens().indexOf(token);
+        String variableDestino = currentOp.lexemeRank(j + 2);
+        String variableOrigen = currentOp.lexemeRank(j + 5);
+        String operacionString = "ASIGNAR" + variableOrigen + variableDestino;
+        if (!operacionesGeneradas.contains(operacionString)) {
+            GCI.generarCodigoIntermedio("ASIGNAR", variableOrigen, "", variableDestino);
+            operacionesGeneradas.add(operacionString);
+        }
+    }
 
-private void generarImprimir(Production currentOp, Token token) {
-    System.out.println("IMPRIMIR");
-    // Implementar lógica para la operación IMPRIMIR si es necesario
-}
+    private void generarImprimir(Production currentOp, Token token) {
+        System.out.println("IMPRIMIR");
+        // Implementar lógica para la operación IMPRIMIR si es necesario
+    }
 
-private double getValor(String lexema, String tipo, Production currentOp) {
-    try {
-        switch (tipo) {
-            case "IDENTIFICADOR":
-                String[] datos = tablaSimbolos.get(lexema);
-                if (datos == null) {
-                    errors.add(new ErrorLSSL(3, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+    private double getValor(String lexema, String tipo, Production currentOp) {
+        try {
+            switch (tipo) {
+                case "IDENTIFICADOR":
+                    String[] datos = tablaSimbolos.get(lexema);
+                    if (datos == null) {
+                        errors.add(new ErrorLSSL(3, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+                        return Double.MIN_VALUE;
+                    }
+                    return Double.parseDouble(datos[1]);
+                case "NUMERO":
+                    return Integer.parseInt(lexema);
+                case "NDECIMAL":
+                    return Double.parseDouble(lexema);
+                default:
                     return Double.MIN_VALUE;
-                }
-                return Double.parseDouble(datos[1]);
-            case "NUMERO":
-                return Integer.parseInt(lexema);
-            case "NDECIMAL":
-                return Double.parseDouble(lexema);
-            default:
-                return Double.MIN_VALUE;
+            }
+        } catch (NumberFormatException e) {
+            errors.add(new ErrorLSSL(6, "Error semántico {}: Formato de número inválido [#,%]", currentOp, false));
+            return Double.MIN_VALUE;
         }
-    } catch (NumberFormatException e) {
-        errors.add(new ErrorLSSL(6, "Error semántico {}: Formato de número inválido [#,%]", currentOp, false));
-        return Double.MIN_VALUE;
     }
-}
 
-private void generarOperaciones(Production prod) {
-    for (Token token : prod.getTokens()) {
-        switch (token.getLexeme()) {
-            case "DIVISION":
-            case "MULTIPLICACION":
-            case "SUMA":
-            case "RESTA":
-                generarOperacion(prod, token);
-                break;
-            case "ASIGNAR":
-                generarAsignacion(prod, token);
-                break;
-            case "IMPRIMIR":
-                generarImprimir(prod, token);
-                break;
-            default:
-                break;
-        }
-    }
-}
- 
     private void fillTableTokens() {
         tokens.forEach(token -> {
             Object[] data = new Object[]{token.getLexicalComp(), token.getLexeme(), "[" + token.getLine() + ", " + token.getColumn() + "]"};
@@ -1392,6 +1464,9 @@ private void generarOperaciones(Production prod) {
         jTextAreaCodigoIntermedio.setText("");
         codigoIntermedio.contadorTemporal = 0;
         codigoIntermedio.codigoIntermedio.clear();
+        operacionesGeneradas.clear();
+        opRealizada=false;
+        siProd.clear();
         codeHasBeenCompiled = false;
     }
 

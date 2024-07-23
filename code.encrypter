@@ -10,8 +10,6 @@ PROCESOS{
 	MULTIPLICACION[#A,#B]=#i;
 		}	
 
-	MIENTRAS(#i==#resultado_mod){
-	RESTA[#A,#B]=#i;
-	}
+	
 	
 }

@@ -1,0 +1,23 @@
+1.1. Tamaño de los datos
+En el 8086/88 se definen los siguientes tamaños de datos:
+4 bits Æ nibble
+8 bits Æ byte
+16 bits Æ word
+32 bits Æ dword
+
+2.1. Registros de datos
+Los registros de datos son de 16 bits, aunque están divididos. lo que permite su acceso en 8 bits.
+Estos registros son de propósito general aunque todos tiene alguna función por defecto.
+
+AX (acumulador) se usa para almacenar el resultado de las operaciones, es al único registro con
+el que se puede hacer divisiones y multiplicaciones. Puede ser accedido en 8 bits como AH para
+la parte alta (HIGH) y AL (LOW) para la parte baja.
+
+BX (registro base) almacena la dirección base para los accesos a memoria. También puede
+accederse como BH y BL, parte alta y baja respectivamente.
+
+CX (contador) actúa como contador en los bucles de repetición. CL (parte baja del registro)
+almacena el desplazamiento en las operaciones de desplazamiento y rotación de múltiples bits.
+
+DX (datos) es usado para almacenar los datos de las operaciones.
+

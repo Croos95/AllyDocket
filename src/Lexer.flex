@@ -238,6 +238,7 @@ PalabrasReservadas ={ROMPER}|{SINO}|{ASIGNAR}|{IMPRIMIR}|{falso}|{verdadero}|{MI
 /* Identificador */
 
 "#" {IDENTIFICADOR}  { return token(yytext(), "IDENTIFICADOR", yyline, yycolumn); }
+
 /*Tipo de Datos*/
 ENTERO { return token(yytext(), "ENTERO", yyline, yycolumn); }
 BOOLEANO { return token(yytext(), "BOOLEANO", yyline, yycolumn); }

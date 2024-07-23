@@ -69,10 +69,11 @@ public class Compilador extends javax.swing.JFrame {
     HashMap<String, String> identDataType = new HashMap<>();
     codigoIntermedio GCI = new codigoIntermedio();
     DefaultTableModel tablaS;
-    public  Boolean opRealizada =false;
+    public Boolean opRealizada = false;
     public static DefaultTableModel tablaC;
     List<String> operandos = new ArrayList<>();
     Set<String> operacionesGeneradas = new HashSet<>();
+    private GeneradorCodigoEnsamblador generadorASM = new GeneradorCodigoEnsamblador();
     Grammar gramatica;
 
     /**
@@ -162,6 +163,8 @@ public class Compilador extends javax.swing.JFrame {
         jTextAreaCodigoIntermedio = new javax.swing.JTextArea();
         jScrollPane6 = new javax.swing.JScrollPane();
         TablaCuadruplos = new javax.swing.JTable();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        jTextASMpreview = new javax.swing.JTextArea();
         PnlLogos = new javax.swing.JPanel();
         TxtLogo = new javax.swing.JLabel();
         TxtTec = new javax.swing.JLabel();
@@ -402,6 +405,12 @@ public class Compilador extends javax.swing.JFrame {
         jScrollPane6.setViewportView(TablaCuadruplos);
 
         TabbedPane.addTab("Cuádruplos", jScrollPane6);
+
+        jTextASMpreview.setColumns(20);
+        jTextASMpreview.setRows(5);
+        jScrollPane7.setViewportView(jTextASMpreview);
+
+        TabbedPane.addTab("Preview ASM", jScrollPane7);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -769,6 +778,7 @@ public class Compilador extends javax.swing.JFrame {
         codigoIntSiyMientras();
         // Imprimir el código intermedio generado
         GCI.imprimirCodigoIntermedio();
+        generarCodigoASM();
         printConsole();
         codeHasBeenCompiled = true;
     }
@@ -1141,8 +1151,9 @@ public class Compilador extends javax.swing.JFrame {
         }
 
     }
+//CODIGO INTERMEDIO
 
-     public void codigoIntSiyMientras() {
+    public void codigoIntSiyMientras() {
         int etiqueta = 0;
         if (!siProd.isEmpty()) {
             for (Production prod : siProd) {
@@ -1187,7 +1198,7 @@ public class Compilador extends javax.swing.JFrame {
                 etiqueta += 2;
 
                 GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaInicio);
-                
+
                 switch (operador) {
                     case "==":
                         GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
@@ -1398,6 +1409,204 @@ public class Compilador extends javax.swing.JFrame {
         // Implementar lógica para la operación IMPRIMIR si es necesario
     }
 
+    //CODIGO INTERMEDIO 
+    //CODIGO OBJETO
+    public void generarCodigoASM() {
+        int etiqueta = 0;
+        if (!siProd.isEmpty()) {
+            for (Production prod : siProd) {
+                String operando1 = prod.lexemeRank(2);
+                String operador = prod.lexemeRank(3);
+                String operando2 = prod.lexemeRank(4);
+                etiqueta++;
+                String etiquetaFin = "Label" + etiqueta;
+                switch (operador) {
+                    case "==":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JE " + etiquetaFin);
+                        break;
+                    case "!=":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JNE " + etiquetaFin);
+                        break;
+                    case "<<":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JL " + etiquetaFin);
+                        break;
+                    case ">>":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JG " + etiquetaFin);
+                        break;
+                    case "<=":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JLE " + etiquetaFin);
+                        break;
+                    case ">=":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JGE " + etiquetaFin);
+                        break;
+                }
+                verificacionSemanticaEnBloque(prod);
+                generacionCodigoEnsambladorEnBloque(prod);
+                generadorASM.agregarInstruccion(etiquetaFin + ":");
+            }
+        }
+        if (!mientrasProd.isEmpty()) {
+            for (Production prod : mientrasProd) {
+                String operando1 = prod.lexemeRank(2);
+                String operador = prod.lexemeRank(3);
+                String operando2 = prod.lexemeRank(4);
+                int etiquetaInicio = etiqueta;
+                int etiquetaFin = etiqueta + 1;
+                etiqueta += 2;
+
+                generadorASM.agregarInstruccion("Label" + etiquetaInicio + ":");
+                switch (operador) {
+                    case "==":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JE Label" + etiquetaFin);
+                        break;
+                    case "!=":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JNE Label" + etiquetaFin);
+                        break;
+                    case "<<":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JL Label" + etiquetaFin);
+                        break;
+                    case ">>":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JG Label" + etiquetaFin);
+                        break;
+                    case "<=":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JLE Label" + etiquetaFin);
+                        break;
+                    case ">=":
+                        generadorASM.agregarInstruccion("CMP " + operando1 + ", " + operando2);
+                        generadorASM.agregarInstruccion("JGE Label" + etiquetaFin);
+                        break;
+                }
+                verificacionSemanticaEnBloque(prod);
+                generacionCodigoEnsambladorEnBloque(prod);
+                generadorASM.agregarInstruccion("JMP Label" + etiquetaInicio);
+                generadorASM.agregarInstruccion("Label" + etiquetaFin + ":");
+            }
+        }
+        for (Production prod : mainProd) {
+            verificacionSemantica(prod);
+            generacionCodigoEnsamblador(prod);
+        }
+
+        // Mostrar código ensamblador en jTextASMpreview
+        String codigoEnsamblador = generadorASM.obtenerCodigoEnsamblador();
+        Compilador.jTextASMpreview.setText(codigoEnsamblador);
+    }
+
+    private void generacionCodigoEnsambladorEnBloque(Production bloque) {
+        for (Token token : bloque.getTokens()) {
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                case "MULTIPLICACION":
+                case "SUMA":
+                case "RESTA":
+                    generarOperacionASM(bloque, token);
+                    break;
+                case "ASIGNAR":
+                    generarAsignacionASM(bloque, token);
+                    break;
+                case "IMPRIMIR":
+                    generarImprimirASM(bloque, token);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void generacionCodigoEnsamblador(Production prod) {
+        for (Token token : prod.getTokens()) {
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                case "MULTIPLICACION":
+                case "SUMA":
+                case "RESTA":
+                    generarOperacionASM(prod, token);
+                    break;
+                case "ASIGNAR":
+                    generarAsignacionASM(prod, token);
+                    break;
+                case "IMPRIMIR":
+                    generarImprimirASM(prod, token);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void generarOperacionASM(Production currentOp, Token token) {
+        List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
+        int j = currentOp.getTokens().indexOf(token) + 2;
+        String operacion = token.getLexeme();
+
+        while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
+            if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
+                String operando = currentOp.lexemeRank(j);
+                operandos.add(operando);
+            }
+            j++;
+        }
+
+        String resultado = currentOp.lexemeRank(j + 1);
+        String temp = operandos.get(0);
+
+        for (int i = 1; i < operandos.size(); i++) {
+            String operando = operandos.get(i);
+            String nuevoTemp = generarTemporal();
+            String operacionASM = generarOperacionASM(operacion, temp, operando, nuevoTemp);
+            generadorASM.agregarInstruccion(operacionASM);
+            temp = nuevoTemp;
+        }
+        generadorASM.agregarInstruccion("MOV " + resultado + ", " + temp);
+        operandos.clear();
+    }
+
+    private String generarOperacionASM(String operacion, String operando1, String operando2, String resultado) {
+        switch (operacion) {
+            case "MULTIPLICACION":
+                return "MUL " + operando1 + ", " + operando2 + " -> " + resultado;
+            case "DIVISION":
+                return "DIV " + operando1 + ", " + operando2 + " -> " + resultado;
+            case "SUMA":
+                return "ADD " + operando1 + ", " + operando2 + " -> " + resultado;
+            case "RESTA":
+                return "SUB " + operando1 + ", " + operando2 + " -> " + resultado;
+            default:
+                return "";
+        }
+    }
+
+    private void generarAsignacionASM(Production currentOp, Token token) {
+        int j = currentOp.getTokens().indexOf(token);
+        String variableDestino = currentOp.lexemeRank(j + 2);
+        String variableOrigen = currentOp.lexemeRank(j + 5);
+        generadorASM.agregarInstruccion("MOV " + variableDestino + ", " + variableOrigen);
+    }
+
+    private void generarImprimirASM(Production currentOp, Token token) {
+        System.out.println("IMPRIMIR");
+        // Implementar lógica para la operación IMPRIMIR si es necesario
+    }
+
+
+    private int contadorTemporal = 0;
+
+    private String generarTemporal() {
+        return "T" + (contadorTemporal++);
+    }
+
+    //CODIGO OBJETO
     private double getValor(String lexema, String tipo, Production currentOp) {
         try {
             switch (tipo) {
@@ -1465,7 +1674,7 @@ public class Compilador extends javax.swing.JFrame {
         codigoIntermedio.contadorTemporal = 0;
         codigoIntermedio.codigoIntermedio.clear();
         operacionesGeneradas.clear();
-        opRealizada=false;
+        opRealizada = false;
         siProd.clear();
         codeHasBeenCompiled = false;
     }
@@ -1555,8 +1764,10 @@ public class Compilador extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator6;
+    public static javax.swing.JTextArea jTextASMpreview;
     public static javax.swing.JTextArea jTextAreaCodigoIntermedio;
     private javax.swing.JTextArea jtaOutputConsole;
     private javax.swing.JTextPane jtpCode;

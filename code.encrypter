@@ -13,5 +13,5 @@ PROCESOS{
 	MIENTRAS(#i==#resultado_mod){
 	RESTA[#A,#B]=#i;
 	}
-	SUMA[#A,#B]=#i;
+	
 }

@@ -1252,8 +1252,8 @@ public class Compilador extends javax.swing.JFrame {
                 String etiquetaFin = "Label" + etiqueta;
                 switch (operador) {
                     case "==":
-                        GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
-
+                        GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "" );
+                        GCI.generarCodigoIntermedio("GOTO " , "","", etiquetaFin);
                         break;
                     case "!=":
                         GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);

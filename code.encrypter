@@ -7,4 +7,5 @@ VARIABLES {
 
 PROCESOS {
 	SUMA[#A,#B,#C]=#ALMACEN;
+	
 }

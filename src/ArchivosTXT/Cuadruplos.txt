@@ -1,10 +1,8 @@
 Operador	Arg1	Arg2	Resultado	
->=	#i	#A	GOTO Label14	
-*	#A	#B	T13	
-!=	#i	#resultado_mod	GOTO Label15	
--	#A	#B	T14	
-			Label14	
-Label			Label15	
-*	#A	#B	T15	
--	#A	#B	T16	
-=	T16		#i	
+=	12		#A	
+=	1		#B	
+=	0		#ALMACEN	
+=	20		#C	
++	#A	#B	T0	
++	T0	#C	T1	
+=	T1		#ALMACEN	

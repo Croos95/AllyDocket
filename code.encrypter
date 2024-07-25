@@ -6,6 +6,9 @@ VARIABLES {
 }
 
 PROCESOS {
-	SUMA[#A,#B,#C]=#ALMACEN;
+	SI(#A==#A){
+		SUMA[#A,#B,#C]=#ALMACEN;
+	}
+	
 	
 }

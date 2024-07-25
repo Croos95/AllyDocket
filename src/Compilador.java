@@ -1241,85 +1241,67 @@ public class Compilador extends javax.swing.JFrame {
     }
 //CODIGO INTERMEDIO ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void codigoIntSiyMientras() {
-        int etiqueta = 0;
-        if (!siProd.isEmpty()) {
-            for (Production prod : siProd) {
-                String operando1 = prod.lexemeRank(2);
-                String operador = prod.lexemeRank(3);
-                String operando2 = prod.lexemeRank(4);
-                etiqueta++;
-                String etiquetaFin = "Label" + etiqueta;
-                switch (operador) {
-                    case "==":
-                        GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "" );
-                        GCI.generarCodigoIntermedio("GOTO " , "","", etiquetaFin);
-                        break;
-                    case "!=":
-                        GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
-                        break;
-                    case "<<":
-                        GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
-                        break;
-                    case ">>":
-                        GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
-                        break;
-                    case "<=":
-                        GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO " + etiquetaFin);
-                        break;
-                    case ">=":
-                        GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO " + etiquetaFin);
-                        break;
-                }
-                // Generar operaciones dentro del bloque SI
-                verificacionSemanticaEnBloque(prod);
-                generacionCodigoIntermedioEnBloque(prod);
-                GCI.generarCodigoIntermedio("LABEL", "", "", etiquetaFin);
-            }
-        }
-        if (!mientrasProd.isEmpty()) {
-            for (Production prod : mientrasProd) {
-                String operando1 = prod.lexemeRank(2);
-                String operador = prod.lexemeRank(3);
-                String operando2 = prod.lexemeRank(4);
-                int etiquetaInicio = etiqueta;
-                int etiquetaFin = etiqueta + 1;
-                etiqueta += 2;
-
-                GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaInicio);
-
-                switch (operador) {
-                    case "==":
-                        GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
-                        break;
-                    case "!=":
-                        GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO Label" + etiquetaFin);
-                        break;
-                    case "<<":
-                        GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
-                        break;
-                    case ">>":
-                        GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
-                        break;
-                    case "<=":
-                        GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
-                        break;
-                    case ">=":
-                        GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO Label" + etiquetaFin);
-                        break;
-                }
-                // Generar operaciones dentro del bloque MIENTRAS
-                verificacionSemanticaEnBloque(prod);
-                generacionCodigoIntermedioEnBloque(prod);
-                GCI.generarCodigoIntermedio("LABEL", "", "", "GOTO Label" + etiquetaInicio);
-                GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaFin);
-            }
-        }
-        for (Production prod : mainProd) {
-            verificacionSemantica(prod);
-            generacionCodigoIntermedio(prod);
+   public void codigoIntSiyMientras() {
+    int etiqueta = 0;
+    if (!siProd.isEmpty()) {
+        for (Production prod : siProd) {
+            String operando1 = prod.lexemeRank(2);
+            String operador = prod.lexemeRank(3);
+            String operando2 = prod.lexemeRank(4);
+            etiqueta++;
+            String etiquetaFin = "Label" + etiqueta;
+            generarCodigoCondicional(operador, operando1, operando2, etiquetaFin);
+            verificacionSemanticaEnBloque(prod);
+            generacionCodigoIntermedioEnBloque(prod);
+            GCI.generarCodigoIntermedio("LABEL", "", "", etiquetaFin);
         }
     }
+    if (!mientrasProd.isEmpty()) {
+        for (Production prod : mientrasProd) {
+            String operando1 = prod.lexemeRank(2);
+            String operador = prod.lexemeRank(3);
+            String operando2 = prod.lexemeRank(4);
+            int etiquetaInicio = etiqueta;
+            int etiquetaFin = etiqueta + 1;
+            etiqueta += 2;
+
+            GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaInicio);
+            generarCodigoCondicional(operador, operando1, operando2, "Label" + etiquetaFin);
+            verificacionSemanticaEnBloque(prod);
+            generacionCodigoIntermedioEnBloque(prod);
+            GCI.generarCodigoIntermedio("GOTO", "", "", "Label" + etiquetaInicio);
+            GCI.generarCodigoIntermedio("LABEL", "", "", "Label" + etiquetaFin);
+        }
+    }
+    for (Production prod : mainProd) {
+        verificacionSemantica(prod);
+        generacionCodigoIntermedio(prod);
+    }
+}
+
+private void generarCodigoCondicional(String operador, String operando1, String operando2, String etiquetaFin) {
+    switch (operador) {
+        case "==":
+            GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
+            break;
+        case "!=":
+            GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
+            break;
+        case "<<":
+            GCI.generarCodigoIntermedio("MAYORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
+            break;
+        case ">>":
+            GCI.generarCodigoIntermedio("MENORIGUALQUE", operando1, operando2, "GOTO " + etiquetaFin);
+            break;
+        case "<=":
+            GCI.generarCodigoIntermedio("MAYORQUE", operando1, operando2, "GOTO " + etiquetaFin);
+            break;
+        case ">=":
+            GCI.generarCodigoIntermedio("MENORQUE", operando1, operando2, "GOTO " + etiquetaFin);
+            break;
+    }
+}
+
 
     public void generacionCodigoIntermedio(Production prod) {
         for (Token token : prod.getTokens()) {
@@ -1363,41 +1345,51 @@ public class Compilador extends javax.swing.JFrame {
         }
     }
 
-    private void generarOperacion(Production currentOp, Token token, Set<String> operacionesGeneradas) {
-        List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
-        boolean esDecimal = false;
-        int j = currentOp.getTokens().indexOf(token) + 2;
-        String operacion = token.getLexeme();
+private void generarOperacion(Production currentOp, Token token, Set<String> operacionesGeneradas) {
+    List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
+    List<String> operandos = new ArrayList<>();
+    boolean esDecimal = false;
+    int j = currentOp.getTokens().indexOf(token) + 2;
+    String operacion = token.getLexeme();
 
-        while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
-            if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
-                String operando = currentOp.lexemeRank(j);
-                operandos.add(operando);
-            }
-            j++;
+    while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
+        if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
+            String operando = currentOp.lexemeRank(j);
+            operandos.add(operando);
         }
-
-        String resultado = currentOp.lexemeRank(j + 1);
-        String temp = operandos.get(0);
-
-        for (int i = 1; i < operandos.size(); i++) {
-            String operando = operandos.get(i);
-            String nuevoTemp = GCI.generarTemporal();
-            String operacionString = operacion + temp + operando;
-            if (!operacionesGeneradas.contains(operacionString)) {
-                GCI.generarCodigoIntermedio(operacion, temp, operando, nuevoTemp);
-                temp = nuevoTemp;
-                operacionesGeneradas.add(operacionString);
-            } else {
-                opRealizada = true;
-            }
-        }
-        if (!opRealizada) {
-            GCI.generarCodigoIntermedio("ASIGNAR", temp, "", resultado);
-            operandos.clear();
-        }
-        operandos.clear();
+        j++;
     }
+
+    String resultado = currentOp.lexemeRank(j + 1);
+    if (operandos.isEmpty()) {
+        return; // Si no hay operandos, no hay nada que generar
+    }
+
+    String temp = operandos.get(0);
+    boolean opRealizada = false;
+
+    for (int i = 1; i < operandos.size(); i++) {
+        String operando = operandos.get(i);
+        String nuevoTemp = GCI.generarTemporal();
+        String operacionString = operacion + temp + operando;
+        if (!operacionesGeneradas.contains(operacionString)) {
+            GCI.generarCodigoIntermedio(operacion, temp, operando, nuevoTemp);
+            temp = nuevoTemp;
+            operacionesGeneradas.add(operacionString);
+            opRealizada = false;
+        } else {
+            opRealizada = true;
+            break;
+        }
+    }
+
+    if (!opRealizada) {
+        GCI.generarCodigoIntermedio("ASIGNAR", temp, "", resultado);
+    }
+
+    operandos.clear();
+}
+
 
     private void generarAsignacion(Production currentOp, Token token) {
         int j = currentOp.getTokens().indexOf(token);
@@ -1501,6 +1493,7 @@ public class Compilador extends javax.swing.JFrame {
         opRealizada = false;
         siProd.clear();
         jTextASMpreview.setText("");
+       
         codeHasBeenCompiled = false;
     }
 

@@ -1,9 +1,7 @@
-SI#i >= #A GOTO Label14
-T13 = #A * #B
-SI#i != #resultado_mod GOTO Label15
-T14 = #A - #B
-Label14 =   
-Label15:
-T15 = #A * #B
-T16 = #A - #B
-#i = T16
+#A = 12
+#B = 1
+#ALMACEN = 0
+#C = 20
+T0 = #A + #B
+T1 = T0 + #C
+#ALMACEN = T1

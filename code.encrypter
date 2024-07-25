@@ -1,15 +1,10 @@
-VARIABLES{
-	ENTERO #num = 29;
-	ENTERO #i =0;
-	ENTERO #A=10;
-	ENTERO #B=10;
-	ENTERO #resultado_mod  = 0;
+VARIABLES {
+ 	ENTERO #A =12;
+	ENTERO #B =1;
+	ENTERO #ALMACEN=0;
+	ENTERO #C=20;
 }
-PROCESOS{
-	SI(#i<<#A){
-	MULTIPLICACION[#A,#B]=#i;
-		}	
 
-	
-	
+PROCESOS {
+	SUMA[#A,#B,#C]=#ALMACEN;
 }

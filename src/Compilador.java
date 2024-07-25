@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,17 +66,16 @@ public class Compilador extends javax.swing.JFrame {
     public ArrayList<Production> siProd = new ArrayList<>();
     public HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
-    
+
     private HashMap<String, String[]> tablaSimbolos;
     HashMap<String, String> identDataType = new HashMap<>();
     codigoIntermedio GCI = new codigoIntermedio();
+    codigoObjeto GCO = new codigoObjeto();
     DefaultTableModel tablaS;
     public Boolean opRealizada = false;
     public static DefaultTableModel tablaC;
     List<String> operandos = new ArrayList<>();
     Set<String> operacionesGeneradas = new HashSet<>();
-    private GeneradorCodigoEnsamblador generadorASM = new GeneradorCodigoEnsamblador();
-
     Grammar gramatica;
 
     /**
@@ -777,10 +777,10 @@ public class Compilador extends javax.swing.JFrame {
         fillTableTokens();
         syntacticAnalysis();
         semanticAnalysis();
-//        codigoIntSiyMientras();
-        // Imprimir el código intermedio generado
-//        GCI.imprimirCodigoIntermedio();
-        generadorASM.generarCodigoASM();
+        codigoIntSiyMientras();
+//         Imprimir el código intermedio generado
+        GCI.imprimirCodigoIntermedio();
+        generarCodigoObjeto();
         printConsole();
         codeHasBeenCompiled = true;
     }
@@ -977,13 +977,14 @@ public class Compilador extends javax.swing.JFrame {
                 //
                 GCI.generarCodigoIntermedio("ASIGNAR", datos[1], "", id.lexemeRank(1));//GENERAR CUADRUPLOS
                 //
+                GCO.agregarVariable(id.lexemeRank(1), valorAsignado);
+                //
 
                 System.out.println("Agregado a la tabla de simbolos : " + identificadores.toString());
 
             }
 
         }//for identProd
-        generadorASM.agregarInstruccion("");
         variableNoDeclarada();
     }
 
@@ -1155,7 +1156,90 @@ public class Compilador extends javax.swing.JFrame {
         }
 
     }
-//CODIGO INTERMEDIO
+
+    public void verificacionSemantica(Production prod) {
+        for (Token token : prod.getTokens()) {
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                case "MULTIPLICACION":
+                case "SUMA":
+                case "RESTA":
+                    verificarOperacion(prod, token);
+                    break;
+                case "ASIGNAR":
+                    verificarAsignacion(prod, token);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void verificarAsignacion(Production currentOp, Token token) {
+        int j = currentOp.getTokens().indexOf(token);
+        String variableDestino = currentOp.lexemeRank(j + 2);
+        String variableOrigen = currentOp.lexemeRank(j + 5);
+        if (!identificadores.containsKey(variableOrigen)) {
+            errors.add(new ErrorLSSL(3, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
+        }
+    }
+
+    private void verificarOperacion(Production currentOp, Token token) {
+        List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
+        boolean esDecimal = false;
+        int j = currentOp.getTokens().indexOf(token) + 2;
+        boolean errorEncontrado = false;
+        String operacion = token.getLexeme();
+
+        while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
+            if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
+                double valorOperando = getValor(currentOp.lexemeRank(j), currentOp.lexicalCompRank(j), currentOp);
+                if (valorOperando == Double.MIN_VALUE) {
+                    errorEncontrado = true;
+                    break;
+                }
+                String am = identificadores.getOrDefault(currentOp.lexemeRank(j), "");
+                String am2 = identificadores.getOrDefault(currentOp.lexemeRank(j + 2), "");
+                if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
+                        && currentOp.lexicalCompRank(j).equals("NUMERO")
+                        && currentOp.lexicalCompRank(j + 2).equals("NDECIMAL")) {
+                    errors.add(new ErrorLSSL(4, "Error semántico {}: Operación de tipos incompatibles [#,%] En la operación =[ " + operacion + "]", currentOp, false));
+                    errorEncontrado = true;
+                    break;
+                }
+
+                if (currentOp.lexicalCompRank(j).equals("NDECIMAL") || am.equals("DECIMAL")) {
+                    esDecimal = true;
+                }
+
+                if (operacion.equals("DIVISION") && valorOperando == 0) {
+                    errors.add(new ErrorLSSL(5, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
+                    errorEncontrado = true;
+                    break;
+                }
+            }
+            j++;
+        }
+    }
+
+    public void verificacionSemanticaEnBloque(Production bloque) {
+        for (Token token : bloque.getTokens()) {
+            switch (token.getLexeme()) {
+                case "DIVISION":
+                case "MULTIPLICACION":
+                case "SUMA":
+                case "RESTA":
+                    verificarOperacion(bloque, token);
+                    break;
+                case "ASIGNAR":
+                    verificarAsignacion(bloque, token);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+//CODIGO INTERMEDIO ///////////////////////////////////////////////////////////////////////////////////////////////
 
     public void codigoIntSiyMientras() {
         int etiqueta = 0;
@@ -1169,6 +1253,7 @@ public class Compilador extends javax.swing.JFrame {
                 switch (operador) {
                     case "==":
                         GCI.generarCodigoIntermedio("DESIGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
+
                         break;
                     case "!=":
                         GCI.generarCodigoIntermedio("IGUALDAD", operando1, operando2, "GOTO " + etiquetaFin);
@@ -1236,24 +1321,6 @@ public class Compilador extends javax.swing.JFrame {
         }
     }
 
-    public void verificacionSemantica(Production prod) {
-        for (Token token : prod.getTokens()) {
-            switch (token.getLexeme()) {
-                case "DIVISION":
-                case "MULTIPLICACION":
-                case "SUMA":
-                case "RESTA":
-                    verificarOperacion(prod, token);
-                    break;
-                case "ASIGNAR":
-                    verificarAsignacion(prod, token);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
     public void generacionCodigoIntermedio(Production prod) {
         for (Token token : prod.getTokens()) {
             switch (token.getLexeme()) {
@@ -1268,24 +1335,6 @@ public class Compilador extends javax.swing.JFrame {
                     break;
                 case "IMPRIMIR":
                     generarImprimir(prod, token);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    public void verificacionSemanticaEnBloque(Production bloque) {
-        for (Token token : bloque.getTokens()) {
-            switch (token.getLexeme()) {
-                case "DIVISION":
-                case "MULTIPLICACION":
-                case "SUMA":
-                case "RESTA":
-                    verificarOperacion(bloque, token);
-                    break;
-                case "ASIGNAR":
-                    verificarAsignacion(bloque, token);
                     break;
                 default:
                     break;
@@ -1311,44 +1360,6 @@ public class Compilador extends javax.swing.JFrame {
                 default:
                     break;
             }
-        }
-    }
-
-    private void verificarOperacion(Production currentOp, Token token) {
-        List<String> valoresValidos = Arrays.asList("IDENTIFICADOR", "NUMERO", "NDECIMAL");
-        boolean esDecimal = false;
-        int j = currentOp.getTokens().indexOf(token) + 2;
-        boolean errorEncontrado = false;
-        String operacion = token.getLexeme();
-
-        while (j < currentOp.getSizeTokens() && !currentOp.lexicalCompRank(j).equals("ASIGNACION")) {
-            if (valoresValidos.contains(currentOp.lexicalCompRank(j))) {
-                double valorOperando = getValor(currentOp.lexemeRank(j), currentOp.lexicalCompRank(j), currentOp);
-                if (valorOperando == Double.MIN_VALUE) {
-                    errorEncontrado = true;
-                    break;
-                }
-                String am = identificadores.getOrDefault(currentOp.lexemeRank(j), "");
-                String am2 = identificadores.getOrDefault(currentOp.lexemeRank(j + 2), "");
-                if (am.equals("ENTERO") && am2.equals("DECIMAL") || am.equals("DECIMAL") && am2.equals("ENTERO")
-                        && currentOp.lexicalCompRank(j).equals("NUMERO")
-                        && currentOp.lexicalCompRank(j + 2).equals("NDECIMAL")) {
-                    errors.add(new ErrorLSSL(4, "Error semántico {}: Operación de tipos incompatibles [#,%] En la operación =[ " + operacion + "]", currentOp, false));
-                    errorEncontrado = true;
-                    break;
-                }
-
-                if (currentOp.lexicalCompRank(j).equals("NDECIMAL") || am.equals("DECIMAL")) {
-                    esDecimal = true;
-                }
-
-                if (operacion.equals("DIVISION") && valorOperando == 0) {
-                    errors.add(new ErrorLSSL(5, "Error semántico {}: No se puede dividir entre 0 [#,%]", currentOp, false));
-                    errorEncontrado = true;
-                    break;
-                }
-            }
-            j++;
         }
     }
 
@@ -1388,15 +1399,6 @@ public class Compilador extends javax.swing.JFrame {
         operandos.clear();
     }
 
-    private void verificarAsignacion(Production currentOp, Token token) {
-        int j = currentOp.getTokens().indexOf(token);
-        String variableDestino = currentOp.lexemeRank(j + 2);
-        String variableOrigen = currentOp.lexemeRank(j + 5);
-        if (!identificadores.containsKey(variableOrigen)) {
-            errors.add(new ErrorLSSL(3, "Error semántico {}: Identificador no encontrado en la tabla de símbolos [#,%]", currentOp, false));
-        }
-    }
-
     private void generarAsignacion(Production currentOp, Token token) {
         int j = currentOp.getTokens().indexOf(token);
         String variableDestino = currentOp.lexemeRank(j + 2);
@@ -1412,9 +1414,22 @@ public class Compilador extends javax.swing.JFrame {
         System.out.println("IMPRIMIR");
         // Implementar lógica para la operación IMPRIMIR si es necesario
     }
+//CODIGO INTERMEDIO ///////////////////////////////////////////////////////////////////////////////////////////////
+//CODIGO OBJETO//////////////////////////////////////////////////////////////////////////
 
-    //CODIGO INTERMEDIO 
-   
+    private void generarCodigoObjeto() {
+        GCO.generarCodigoObjeto(codigoIntermedio.codigoIntermedio);
+        String codigoASM = GCO.obtenerCodigoASM();
+        jTextASMpreview.setText(codigoASM);
+        // Puedes guardar el código ASM en un archivo si es necesario
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/ArchivosTXT/Codigo codigo.asm"))) {
+            writer.write(codigoASM);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+//CODIGO OBJETO//////////////////////////////////////////////////////////////////////////
+
     private double getValor(String lexema, String tipo, Production currentOp) {
         try {
             switch (tipo) {
@@ -1481,6 +1496,7 @@ public class Compilador extends javax.swing.JFrame {
         jTextAreaCodigoIntermedio.setText("");
         codigoIntermedio.contadorTemporal = 0;
         codigoIntermedio.codigoIntermedio.clear();
+
         operacionesGeneradas.clear();
         opRealizada = false;
         siProd.clear();

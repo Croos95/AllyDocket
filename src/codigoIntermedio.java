@@ -8,7 +8,7 @@ import java.util.Set;
 public class codigoIntermedio {
 
     public static class Quadruple {
-
+        
             public String operador;
             public String operador1;
             public String operador2;
@@ -19,6 +19,7 @@ public class codigoIntermedio {
                 this.operador1 = operador1;
                 this.operador2 = operador2;
                 this.resultado = resultado;
+                
             }
 
             @Override
@@ -120,7 +121,7 @@ public class codigoIntermedio {
         public void imprimirCodigoIntermedio() {
             for (Quadruple quad : codigoIntermedio) {
                 // Aquí se manda a un textArea en la GUI del frame Compilador
-
+                
                 Compilador.jTextAreaCodigoIntermedio.append(quad.toString() + "\n");
                 Compilador.tablaC.addRow(new Object[]{quad.operador, quad.operador1, quad.operador2, quad.resultado});
 

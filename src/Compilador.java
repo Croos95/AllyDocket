@@ -783,6 +783,7 @@ public class Compilador extends javax.swing.JFrame {
         codigoIntSiyMientras();
 //         Imprimir el código intermedio generado
         GCI.imprimirCodigoIntermedio();
+
         generarCodigoObjeto();
         // Ejecutar el archivo .asm con emu8086
         ejecutarASM();
@@ -1528,10 +1529,10 @@ public class Compilador extends javax.swing.JFrame {
         jTextAreaCodigoIntermedio.setText("");
         codigoIntermedio.contadorTemporal = 0;
         codigoIntermedio.codigoIntermedio.clear();
-
         operacionesGeneradas.clear();
         opRealizada = false;
         siProd.clear();
+
         jTextASMpreview.setText("");
 
         codeHasBeenCompiled = false;

@@ -1,8 +1,10 @@
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class codigoObjeto {
+
     public StringBuilder asm;
     private Set<String> etiquetasUsadas;
     private Set<String> variablesDeclaradas;
@@ -51,53 +53,100 @@ public class codigoObjeto {
 
     // Método para generar código objeto a partir del código intermedio
     public void generarCodigoObjeto(List<codigoIntermedio.Quadruple> codigoIntermedio) {
-        for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
-            // Agregar temporales a la sección .DATA si no están declarados
-            if (quad.resultado.startsWith("T")) {
-                agregarTemporal(quad.resultado);
-            }
+    for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
+        // Agregar temporales a la sección .DATA si no están declarados
+        if (quad.resultado.startsWith("T")) {
+            agregarTemporal(quad.resultado);
         }
-
-        asm.append(".CODE\n");
-        asm.append("START:\n");
-        asm.append("MOV AX, @DATA\n");
-        asm.append("MOV DS, AX\n");
-        asm.append("MOV ES, AX\n");
-
-        for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
-            traducirCuadruplo(quad);
-        }
-
-        asm.append("MOV AX, 4C00h\n");
-        asm.append("INT 21h\n");
-        asm.append("END START\n");
     }
 
-   private void traducirCuadruplo(codigoIntermedio.Quadruple quad) {
+    asm.append(".CODE\n");
+    asm.append("START:\n");
+    asm.append("MOV AX, @DATA\n");
+    asm.append("MOV DS, AX\n");
+    asm.append("MOV ES, AX\n");
+
+    for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
+        traducirCuadruplo(quad);
+    }
+
+    asm.append("MOV AX, 4C00h\n");
+    asm.append("INT 21h\n");
+ 
+
+    // Añadir la función de impresión al final del código
+    asm.append("PRINT_NUM:\n");
+    asm.append("PUSH AX\n");
+    asm.append("PUSH BX\n");
+    asm.append("PUSH CX\n");
+    asm.append("PUSH DX\n");
+    asm.append("MOV BX, 10\n");
+    asm.append("MOV CX, 0\n");
+    asm.append("MOV DX, 0\n");
+    asm.append("DIVIDE:\n");
+    asm.append("XOR DX, DX\n");
+    asm.append("DIV BX\n");
+    asm.append("PUSH DX\n");
+    asm.append("INC CX\n");
+    asm.append("OR AX, AX\n");
+    asm.append("JNZ DIVIDE\n");
+    asm.append("PRINT_LOOP:\n");
+    asm.append("POP DX\n");
+    asm.append("ADD DL, 30h\n");
+    asm.append("MOV AH, 02h\n");
+    asm.append("INT 21h\n");
+    asm.append("LOOP PRINT_LOOP\n");
+    asm.append("POP DX\n");
+    asm.append("POP CX\n");
+    asm.append("POP BX\n");
+    asm.append("POP AX\n");
+    asm.append("RET\n");
+    asm.append("END START\n");
+}
+
+
+    private void traducirCuadruplo(codigoIntermedio.Quadruple quad) {
+    // Lista de registros disponibles
+    String[] registros = {"AX", "BX", "CX", "DX"};
+    // Variables para almacenar los registros utilizados
+    String reg1 = "AX";
+    String reg2 = "BX";
+
     switch (quad.operador) {
         case "=":
-            asm.append("MOV AX, ").append(quad.operador1.replace("#", "")).append("\n");
-            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", AX\n");
+            reg1 = registros[0];
+            asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
+            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", ").append(reg1).append("\n");
             break;
         case "+":
-            asm.append("MOV AX, ").append(quad.operador1.replace("#", "")).append("\n");
-            asm.append("ADD AX, ").append(quad.operador2.replace("#", "")).append("\n");
-            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", AX\n");
+            reg1 = registros[0];
+            reg2 = registros[1];
+            asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
+            asm.append("ADD ").append(reg1).append(", ").append(quad.operador2.replace("#", "")).append("\n");
+            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", ").append(reg1).append("\n");
             break;
         case "-":
-            asm.append("MOV AX, ").append(quad.operador1.replace("#", "")).append("\n");
-            asm.append("SUB AX, ").append(quad.operador2.replace("#", "")).append("\n");
-            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", AX\n");
+            reg1 = registros[0];
+            reg2 = registros[1];
+            asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
+            asm.append("SUB ").append(reg1).append(", ").append(quad.operador2.replace("#", "")).append("\n");
+            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", ").append(reg1).append("\n");
             break;
         case "*":
-            asm.append("MOV AX, ").append(quad.operador1.replace("#", "")).append("\n");
-            asm.append("MUL ").append(quad.operador2.replace("#", "")).append("\n");
-            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", AX\n");
+            reg1 = registros[0];
+            reg2 = registros[1];
+            asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
+            asm.append("MOV ").append(reg2).append(", ").append(quad.operador2.replace("#", "")).append("\n");
+            asm.append("MUL ").append(reg2).append("\n");
+            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", ").append(reg1).append("\n");
             break;
         case "/":
-            asm.append("MOV AX, ").append(quad.operador1.replace("#", "")).append("\n");
-            asm.append("DIV ").append(quad.operador2.replace("#", "")).append("\n");
-            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", AX\n");
+            reg1 = registros[0];
+            reg2 = registros[1];
+            asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
+            asm.append("MOV ").append(reg2).append(", ").append(quad.operador2.replace("#", "")).append("\n");
+            asm.append("DIV ").append(reg2).append("\n");
+            asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", ").append(reg1).append("\n");
             break;
         case "LABEL":
             asm.append(quad.resultado).append(":\n");
@@ -111,9 +160,16 @@ public class codigoObjeto {
         case ">>":
         case "<=":
         case ">=":
-            asm.append("MOV AX, ").append(quad.operador1.replace("#", "")).append("\n");
-            asm.append("CMP AX, ").append(quad.operador2.replace("#", "")).append("\n");
+            reg1 = registros[0];
+            reg2 = registros[1];
+            asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
+            asm.append("CMP ").append(reg1).append(", ").append(quad.operador2.replace("#", "")).append("\n");
             traducirSaltoCondicional(quad.operador, quad.resultado);
+            break;
+        case "IMPRIMIR":
+            reg1 = registros[0];
+            asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
+            asm.append("CALL PRINT_NUM\n"); // Llama a la función de impresión que se debe definir en ensamblador
             break;
         default:
             throw new UnsupportedOperationException("Operador no soportado: " + quad.operador);
@@ -142,6 +198,7 @@ private void traducirSaltoCondicional(String operador, String etiqueta) {
             break;
     }
 }
+
 
     // Método para obtener el código ensamblador completo
     public String obtenerCodigoASM() {

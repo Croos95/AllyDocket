@@ -2,6 +2,9 @@
 #B = 1
 #ALMACEN = 0
 #C = 20
-T0 = #A + #B
-T1 = T0 + #C
+SI#A != #A GOTO Label1
+T0 = #A * #B
+T1 = T0 * #C
 #ALMACEN = T1
+IMPRIMIR #ALMACEN
+Label1:

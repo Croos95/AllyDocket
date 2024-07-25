@@ -25,25 +25,28 @@ public class codigoIntermedio {
             return imprimirCI();
         }
 
-        public String imprimirCI() {
-            switch (operador) {
-                case "=":
-                    return resultado + " " + operador + " " + operador1;
-                case "==":
-                case "!=":
-                case "<<":
-                case ">=":
-                case "<=":
-                case ">>":
-                    return "SI" + operador1 + " " + operador + " " + operador2 + " " + resultado;
-                case "LABEL":
-                    return resultado + ":";
-                case "GOTO":
-                    return "GOTO " + resultado;
-                default:
-                    return resultado + " = " + operador1 + " " + operador + " " + operador2;
-            }
-        }
+       public String imprimirCI() {
+    switch (operador) {
+        case "=":
+            return resultado + " " + operador + " " + operador1;
+        case "==":
+        case "!=":
+        case "<<":
+        case ">=":
+        case "<=":
+        case ">>":
+            return "SI" + operador1 + " " + operador + " " + operador2 + " " + resultado;
+        case "LABEL":
+            return resultado + ":";
+        case "GOTO":
+            return "GOTO " + resultado;
+        case "IMPRIMIR":
+            return "IMPRIMIR " + operador1; // Agregar el caso para IMPRIMIR
+        default:
+            return resultado + " = " + operador1 + " " + operador + " " + operador2;
+    }
+}
+
 
         @Override
         public boolean equals(Object obj) {
@@ -84,38 +87,41 @@ public class codigoIntermedio {
         generarCodigoIntermedio(operacion, operando1, operando2, resultado);
     }
 
-    public String obtenerOperador(String operacion) {
-        switch (operacion) {
-            case "MULTIPLICACION":
-                return "*";
-            case "DIVISION":
-                return "/";
-            case "SUMA":
-                return "+";
-            case "RESTA":
-                return "-";
-            case "ASIGNAR":
-                return "=";
-            case "IGUALDAD":
-                return "==";
-            case "DESIGUALDAD":
-                return "!=";
-            case "MENORQUE":
-                return "<<";
-            case "MAYORIGUALQUE":
-                return ">=";
-            case "MENORIGUALQUE":
-                return "<=";
-            case "MAYORQUE":
-                return ">>";
-            case "LABEL":
-                return "LABEL";
-            case "GOTO":
-                return "GOTO";
-            default:
-                return "";
-        }
+public String obtenerOperador(String operacion) {
+    switch (operacion) {
+        case "MULTIPLICACION":
+            return "*";
+        case "DIVISION":
+            return "/";
+        case "SUMA":
+            return "+";
+        case "RESTA":
+            return "-";
+        case "ASIGNAR":
+            return "=";
+        case "IGUALDAD":
+            return "==";
+        case "DESIGUALDAD":
+            return "!=";
+        case "MENORQUE":
+            return "<<";
+        case "MAYORIGUALQUE":
+            return ">=";
+        case "MENORIGUALQUE":
+            return "<=";
+        case "MAYORQUE":
+            return ">>";
+        case "LABEL":
+            return "LABEL";
+        case "GOTO":
+            return "GOTO";
+        case "IMPRIMIR":
+            return "IMPRIMIR"; // Agregar el caso para IMPRIMIR
+        default:
+            return "";
     }
+}
+
 
     public void imprimirCodigoIntermedio() {
         for (Quadruple quad : codigoIntermedio) {

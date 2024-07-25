@@ -22,14 +22,40 @@ public class codigoObjeto {
         asm.append(".DATA\n");
     }
 
-    // Método para agregar una variable
+  // Método para agregar una variable
     public void agregarVariable(String nombre, String valor) {
         if (!variablesDeclaradas.contains(nombre)) {
-            asm.append(nombre.replace("#", "")).append(" DW ").append(valor).append("\n");
+            String tipo = determinarTipo(valor);
+            String declaracion = nombre.replace("#", "") + " " + tipo + " " + formatearValor(valor, tipo) + "\n";
+            asm.append(declaracion);
             variablesDeclaradas.add(nombre);
         }
     }
 
+    // Método para determinar el tipo de variable
+    private String determinarTipo(String valor) {
+        if (valor.matches("^-?\\d+$")) {
+            return "DW"; // Entero
+        } else if (valor.matches("^-?\\d*\\.\\d+$")) {
+            return "DB"; // Simulación de punto flotante como cadena
+        } else if (valor.matches("^'.*'$")) {
+            return "DB"; // Cadena de texto
+        } else {
+            throw new IllegalArgumentException("Tipo de variable no soportado: " + valor);
+        }
+    }
+
+    // Método para formatear el valor basado en el tipo
+    private String formatearValor(String valor, String tipo) {
+        switch (tipo) {
+            case "DW":
+                return valor;
+            case "DB":
+                return valor.matches("^-?\\d*\\.\\d+$") ? "\"" + valor + "\"" : valor; // Punto flotante como cadena
+            default:
+                throw new IllegalArgumentException("Tipo de variable no soportado: " + tipo);
+        }
+    }
     // Método para agregar una etiqueta única
     public void agregarEtiqueta(String etiqueta) {
         if (!etiquetasUsadas.contains(etiqueta)) {

@@ -1445,36 +1445,19 @@ public class Compilador extends javax.swing.JFrame {
             ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
-
-            // Leer la salida del proceso
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            } 
-            // Esperar un momento para asegurar que la ventana de emu8086 esté lista Thread
-            Thread.sleep(10000);  // Ajusta el tiempo de espera según sea necesario
-
-            // Usar JNA para traer la ventana al frente
-            HWND hwnd = User32.INSTANCE.FindWindow(null, "emu8086");
-            if (hwnd != null) {
-                User32.INSTANCE.ShowWindow(hwnd, WinUser.SW_RESTORE);
-                User32.INSTANCE.SetForegroundWindow(hwnd);
-            }
-
-            // Crear una instancia de Robot para simular las teclas
-            Robot robot = new Robot();
-
-            // Simular la tecla F5
-            robot.keyPress(KeyEvent.VK_F5);
-            robot.keyRelease(KeyEvent.VK_F5);
-
-            // Esperar a que el proceso termine
+//
+//            // Leer la salida del proceso
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//            String line;
+//            while ((line = reader.readLine()) != null) {
+//                System.out.println(line);
+//            } 
+//            // Esperar un momento para asegurar que la ventana de emu8086 esté lista Thread
+//            Thread.sleep(10000);  // Ajusta el tiempo de espera según sea necesario
+       
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-        } catch (AWTException ex) {
-            Logger.getLogger(Compilador.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 //CODIGO OBJETO//////////////////////////////////////////////////////////////////////////

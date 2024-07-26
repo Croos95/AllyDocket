@@ -51,7 +51,7 @@ public class codigoObjeto {
                 return valor;
             case "DB":
                 // Quitar las comillas dobles y añadir el $
-                return "'" + valor.substring(1, valor.length() - 1) + " $'";
+                return "10,13 , '" + valor.substring(1, valor.length() - 1) + " $'";
             default:
                 throw new IllegalArgumentException("Tipo de variable no soportado: " + tipo);
         }
@@ -122,6 +122,12 @@ public class codigoObjeto {
         asm.append("MOV AH, 05h\n"); // Cambiado a la función de impresora
         asm.append("INT 21h\n");
         asm.append("LOOP PRINT_LOOP\n");
+        asm.append("MOV DL, 0Ah\n"); // Salto de línea
+        asm.append("MOV AH, 02h\n");
+        asm.append("INT 21h\n");
+        asm.append("MOV DL, 0Dh\n"); // Retorno de carro
+        asm.append("MOV AH, 02h\n");
+        asm.append("INT 21h\n");
         asm.append("POP DX\n");
         asm.append("POP CX\n");
         asm.append("POP BX\n");

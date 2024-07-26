@@ -1,15 +1,22 @@
 VARIABLES{
 	ENTERO #num = 29;
 	ENTERO #i =0;
-	ENTERO #A=10;
+	ENTERO #A=20;
 	ENTERO #B=10;
 	ENTERO #resultado_mod  = 0;
+ 	TEXTO #HOLA ="HOLA";
 }
 PROCESOS{
 	SI(#i<<#A){
 	MULTIPLICACION[#A,#B]=#i;
-		}	
+	}	
 
-	
-	
+	MIENTRAS(#i != #resultado_mod){
+		RESTA[#i,#B]= #i ;
+		IMPRIMIR[#i];
+
+	}
+
+	IMPRIMIR[#i];
+	IMPRIMIR[#resultado_mod];
 }

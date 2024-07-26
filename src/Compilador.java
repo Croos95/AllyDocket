@@ -67,10 +67,10 @@ public class Compilador extends javax.swing.JFrame {
     public ArrayList<String> operaciones;
     public ArrayList<Production> mientrasProd;
     public ArrayList<Production> siProd = new ArrayList<>();
-    public HashMap<String, String> identificadores;
+    public static HashMap<String, String> identificadores;
     private boolean codeHasBeenCompiled = false;
 
-    private HashMap<String, String[]> tablaSimbolos;
+    public HashMap<String, String[]> tablaSimbolos;
     HashMap<String, String> identDataType = new HashMap<>();
     codigoIntermedio GCI = new codigoIntermedio();
     codigoObjeto GCO = new codigoObjeto();

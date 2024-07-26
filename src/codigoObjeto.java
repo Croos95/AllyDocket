@@ -8,7 +8,7 @@ public class codigoObjeto {
     private Set<String> etiquetasUsadas;
     private Set<String> variablesDeclaradas;
     private Set<String> temporalesDeclarados;
-
+   
     public codigoObjeto() {
         asm = new StringBuilder();
         asm.setLength(0);
@@ -35,9 +35,7 @@ public class codigoObjeto {
     private String determinarTipo(String valor) {
         if (valor.matches("^-?\\d+$")) {
             return "DW"; // Entero
-        } else if (valor.matches("^-?\\d*\\.\\d+$")) {
-            return "DB"; // Simulación de punto flotante como cadena
-        } else if (valor.matches("^'.*'$")) {
+        } else if (valor.matches("^\".*\"$")) {
             return "DB"; // Cadena de texto
         } else {
             throw new IllegalArgumentException("Tipo de variable no soportado: " + valor);
@@ -50,7 +48,8 @@ public class codigoObjeto {
             case "DW":
                 return valor;
             case "DB":
-                return valor.matches("^-?\\d*\\.\\d+$") ? "\"" + valor + "\"" : valor; // Punto flotante como cadena
+                // Quitar las comillas dobles y añadir el $
+                return "'" + valor.substring(1, valor.length() - 1) + " $'";
             default:
                 throw new IllegalArgumentException("Tipo de variable no soportado: " + tipo);
         }
@@ -126,6 +125,12 @@ public class codigoObjeto {
         asm.append("POP BX\n");
         asm.append("POP AX\n");
         asm.append("RET\n");
+
+        asm.append("PRINT_TEXT:\n");
+        asm.append("MOV AH, 05h\n"); // Función de impresión de texto
+        asm.append("INT 21h\n");
+        asm.append("RET\n");
+
         asm.append("END START\n");
     }
 
@@ -138,6 +143,9 @@ public class codigoObjeto {
 
         switch (quad.operador) {
             case "=":
+                if (quad.operador1.startsWith("\"")) {
+                    break;
+                }
                 reg1 = registros[0];
                 asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
                 asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", ").append(reg1).append("\n");
@@ -191,9 +199,19 @@ public class codigoObjeto {
                 traducirSaltoCondicional(quad.operador, quad.resultado);
                 break;
             case "IMPRIMIR":
-                reg1 = registros[0];
-                asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
-                asm.append("CALL PRINT_NUM\n"); // Llama a la función de impresión que se debe definir en ensamblador
+                
+                String tipo = Compilador.identificadores.get(quad.operador1);
+                if (tipo.equals("TEXTO")) {
+                    // Asumimos que es una variable de texto
+                    asm.append("MOV AH, 9h\n");
+                    asm.append("LEA DX, ").append(quad.operador1.replace("#", "")).append("\n");
+                    asm.append("INT 21h\n");
+                } else {
+                    // Asumimos que es un número
+                    reg1 = registros[0];
+                    asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
+                    asm.append("CALL PRINT_NUM\n"); // Llama a la función de impresión que se debe definir en ensamblador
+                }
                 break;
             default:
                 throw new UnsupportedOperationException("Operador no soportado: " + quad.operador);

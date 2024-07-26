@@ -1,10 +1,10 @@
-#A = 12
-#B = 1
-#ALMACEN = 0
-#C = 20
-SI#A != #A GOTO Label1
+#num = 29
+#i = 0
+#A = 10
+#B = 10
+#resultado_mod = 0
+SI#i >= #A GOTO Label1
 T0 = #A * #B
-T1 = T0 * #C
-#ALMACEN = T1
-IMPRIMIR #ALMACEN
+#i = T0
+IMPRIMIR #i
 Label1:

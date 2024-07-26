@@ -1,4 +1,6 @@
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +27,10 @@ public class codigoObjeto {
         asm.append(".MODEL SMALL\n");
         asm.append(".STACK 100h\n");
         asm.append(".DATA\n");
+        asm.append("output DB  'Reporte Salida ' , 10,13"
+                + "        DB  '***************' , 10,13" 
+                + "        DB  'Resultado:     ' , 10,13"
+                + "        DB  '***************' , 10,13  \n");
     }
 
     // Método para agregar una variable
@@ -81,86 +87,110 @@ public class codigoObjeto {
     public void agregarCodigo(String codigo) {
         asm.append(codigo).append("\n");
     }
-
-    // Método para generar código objeto a partir del código intermedio
-    public void generarCodigoObjeto(List<codigoIntermedio.Quadruple> codigoIntermedio) {
-        // Reinicializar valores excepto las variables declaradas
-        asm = new StringBuilder();
-        etiquetasUsadas = new HashSet<>();
-        temporalesDeclarados = new HashSet<>();
-        labels = new ArrayList<>();
-
-        // Inicializar la cabecera del ensamblador
-        asm.append(".MODEL SMALL\n");
-        asm.append(".STACK 100h\n");
-        asm.append(".DATA\n");
-
-        // Volver a agregar las variables ya declaradas
-        for (String declaracion : variablesDeclaradas.values()) {
-            asm.append(declaracion);
-        }
-
-        for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
-            // Agregar temporales a la sección .DATA si no están declarados
-            if (quad.resultado.startsWith("T")) {
-                agregarTemporal(quad.resultado);
-            }
-        }
-
-        asm.append(".CODE\n");
-        asm.append("START:\n");
-        asm.append("MOV AX, @DATA\n");
-        asm.append("MOV DS, AX\n");
-        asm.append("MOV ES, AX\n");
-
-        for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
-            traducirCuadruplo(quad);
-        }
-
-        asm.append("MOV AX, 4C00h\n");
-        asm.append("INT 21h\n");
-
-        // Añadir la función de impresión al final del código
-        asm.append("PRINT_NUM:\n");
-        asm.append("PUSH AX\n");
-        asm.append("PUSH BX\n");
-        asm.append("PUSH CX\n");
-        asm.append("PUSH DX\n");
-        asm.append("MOV BX, 10\n");
-        asm.append("MOV CX, 0\n");
-        asm.append("MOV DX, 0\n");
-        asm.append("DIVIDE:\n");
-        asm.append("XOR DX, DX\n");
-        asm.append("DIV BX\n");
-        asm.append("PUSH DX\n");
-        asm.append("INC CX\n");
-        asm.append("OR AX, AX\n");
-        asm.append("JNZ DIVIDE\n");
-        asm.append("PRINT_LOOP:\n");
-        asm.append("POP DX\n");
-        asm.append("ADD DL, 30h\n");
-        asm.append("MOV AH, 05h\n"); // Cambiado a la función de impresora
-        asm.append("INT 21h\n");
-        asm.append("LOOP PRINT_LOOP\n");
-        asm.append("MOV DL, 0Ah\n"); // Salto de línea
-        asm.append("MOV AH, 02h\n");
-        asm.append("INT 21h\n");
-        asm.append("MOV DL, 0Dh\n"); // Retorno de carro
-        asm.append("MOV AH, 02h\n");
-        asm.append("INT 21h\n");
-        asm.append("POP DX\n");
-        asm.append("POP CX\n");
-        asm.append("POP BX\n");
-        asm.append("POP AX\n");
-        asm.append("RET\n");
-
-        asm.append("PRINT_TEXT:\n");
-        asm.append("MOV AH, 05h\n"); // Función de impresión de texto
-        asm.append("INT 21h\n");
-        asm.append("RET\n");
-
-        asm.append("END START\n");
+    public String obtenerFecha(){
+        // Obtener la fecha actual
+        LocalDate fechaActual = LocalDate.now();
+        String fecha=fechaActual.format(DateTimeFormatter.ISO_DATE);
+       return fecha;
     }
+    // Método para generar código objeto a partir del código intermedio
+ public void generarCodigoObjeto(List<codigoIntermedio.Quadruple> codigoIntermedio) {
+    // Reinicializar valores excepto las variables declaradas
+    asm = new StringBuilder();
+    etiquetasUsadas = new HashSet<>();
+    temporalesDeclarados = new HashSet<>();
+    labels = new ArrayList<>();
+
+    // Inicializar la cabecera del ensamblador
+    asm.append(".MODEL SMALL\n");
+    asm.append(".STACK 100h\n");
+    asm.append(".DATA\n");
+    asm.append("output DB  'Reporte Salida ' , 10,13  \n"
+            + "        DB  '***************' , 10,13  \n" 
+            + "        DB  'Resultado:     ' , 10,13  \n"
+            + "        DB  '***************' , 10,13  \n");
+
+    // Volver a agregar las variables ya declaradas
+    for (String declaracion : variablesDeclaradas.values()) {
+        asm.append(declaracion);
+    }
+
+    for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
+        // Agregar temporales a la sección .DATA si no están declarados
+        if (quad.resultado.startsWith("T")) {
+            agregarTemporal(quad.resultado);
+        }
+    }
+
+    asm.append(".CODE\n");
+    asm.append("START:\n");
+    asm.append("MOV AX, @DATA\n");
+    asm.append("MOV DS, AX\n");
+    asm.append("MOV ES, AX\n");
+    
+    // Código para imprimir el mensaje predeterminado
+    asm.append(
+        "MOV SI, OFFSET output\n" +
+        "PRINT_LOOP:\n" +
+        "MOV AH, 05h\n" +   // Servicio para imprimir un carácter
+        "LODSB\n" +        // Cargar el siguiente byte en AL desde [SI]
+        "CMP AL, 0\n" +    // Comparar AL con 0
+        "JE FIN_PRINT\n" + // Si es 0, fin de la cadena
+        "MOV DL, AL\n" +   // Mover el carácter a DL
+        "INT 21h\n" +      // Interrupción para imprimir DL
+        "JMP PRINT_LOOP\n" + // Repetir el ciclo
+        "FIN_PRINT:\n"
+    );
+
+    for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
+        traducirCuadruplo(quad);
+    }
+
+    asm.append("MOV AX, 4C00h\n");
+    asm.append("INT 21h\n");
+
+    // Añadir la función de impresión al final del código
+    asm.append("PRINT_NUM:\n");
+    asm.append("PUSH AX\n");
+    asm.append("PUSH BX\n");
+    asm.append("PUSH CX\n");
+    asm.append("PUSH DX\n");
+    asm.append("MOV BX, 10\n");
+    asm.append("MOV CX, 0\n");
+    asm.append("MOV DX, 0\n");
+    asm.append("DIVIDE:\n");
+    asm.append("XOR DX, DX\n");
+    asm.append("DIV BX\n");
+    asm.append("PUSH DX\n");
+    asm.append("INC CX\n");
+    asm.append("OR AX, AX\n");
+    asm.append("JNZ DIVIDE\n");
+    asm.append("PRINT_LOOP_NUM:\n");
+    asm.append("POP DX\n");
+    asm.append("ADD DL, 30h\n");
+    asm.append("MOV AH, 05h\n");
+    asm.append("INT 21h\n");
+    asm.append("LOOP PRINT_LOOP_NUM\n");
+    asm.append("MOV DL, 0Ah\n"); // Salto de línea
+    asm.append("MOV AH, 02h\n");
+    asm.append("INT 21h\n");
+    asm.append("MOV DL, 0Dh\n"); // Retorno de carro
+    asm.append("MOV AH, 02h\n");
+    asm.append("INT 21h\n");
+    asm.append("POP DX\n");
+    asm.append("POP CX\n");
+    asm.append("POP BX\n");
+    asm.append("POP AX\n");
+    asm.append("RET\n");
+
+    asm.append("PRINT_TEXT:\n");
+    asm.append("MOV AH, 05h\n");
+    asm.append("LEA DX, [SI]\n");
+    asm.append("INT 21h\n");
+    asm.append("RET\n");
+
+    asm.append("END START\n");
+}
 
     private void traducirCuadruplo(codigoIntermedio.Quadruple quad) {
         // Lista de registros disponibles
@@ -228,7 +258,7 @@ public class codigoObjeto {
                 reg1 = registros[0];
                 reg2 = registros[1];
                 asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
-                asm.append("CMP ").append(reg1).append(", ").append(reg2).append("\n");
+                asm.append("CMP ").append(reg1).append(", ").append(quad.operador2).append("\n");
                 traducirSaltoCondicional(quad.operador, quad.resultado);
                 break;
             case "IMPRIMIR":

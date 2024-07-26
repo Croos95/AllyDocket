@@ -1,11 +1,11 @@
 Operador	Arg1	Arg2	Resultado	
-=	12		#A	
-=	1		#B	
-=	0		#ALMACEN	
-=	20		#C	
-!=	#A	#A	GOTO Label1	
+=	29		#num	
+=	0		#i	
+=	10		#A	
+=	10		#B	
+=	0		#resultado_mod	
+>=	#i	#A	GOTO Label1	
 *	#A	#B	T0	
-*	T0	#C	T1	
-=	T1		#ALMACEN	
-IMPRIMIR	#ALMACEN			
+=	T0		#i	
+IMPRIMIR	#i			
 LABEL			Label1	

@@ -1433,9 +1433,9 @@ public class Compilador extends javax.swing.JFrame {
     public void ejecutarASM() {
         try {
             // Ruta al ejecutable de emu8086
-            String emu8086Path = "E:\\emu8086\\emu8086.exe";
+            String emu8086Path = "c:\\emu8086\\emu8086.exe";
             // Ruta al archivo .asm que deseas ejecutar
-            String asmFilePath = "E:\\Tecnologico\\8vo verano\\LyA2\\Proyectos\\AllyDocket\\src\\ArchivosTXT\\codigo.asm";
+            String asmFilePath = "C:\\Users\\ar90w\\Documents\\GitHub\\AllyDocket\\src\\ArchivosTXT\\codigo.asm";
             // Comando para ejecutar el archivo .asm con emu8086
             String command = emu8086Path + " " + asmFilePath;
 

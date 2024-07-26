@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,13 +9,14 @@ public class codigoObjeto {
     private Set<String> etiquetasUsadas;
     private Set<String> variablesDeclaradas;
     private Set<String> temporalesDeclarados;
-   
+    private ArrayList<String> labels;
     public codigoObjeto() {
         asm = new StringBuilder();
         asm.setLength(0);
         etiquetasUsadas = new HashSet<>();
         variablesDeclaradas = new HashSet<>();
         temporalesDeclarados = new HashSet<>();
+        labels = new ArrayList<>();
         // Inicializar la cabecera del ensamblador
         asm.append(".MODEL SMALL\n");
         asm.append(".STACK 100h\n");
@@ -181,7 +183,14 @@ public class codigoObjeto {
                 asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", ").append(reg1).append("\n");
                 break;
             case "LABEL":
-                asm.append(quad.resultado).append(":\n");
+                
+                if (!labels.contains(quad.resultado)) {
+                    asm.append(quad.resultado).append(":\n");
+                    labels.add(quad.resultado);
+                }else{
+                    break;
+                }
+                
                 break;
             case "GOTO":
                 asm.append("JMP ").append(quad.resultado).append("\n");
@@ -203,9 +212,10 @@ public class codigoObjeto {
                 String tipo = Compilador.identificadores.get(quad.operador1);
                 if (tipo.equals("TEXTO")) {
                     // Asumimos que es una variable de texto
-                    asm.append("MOV AH, 9h\n");
+                    asm.append("MOV AH, 09h\n");
                     asm.append("LEA DX, ").append(quad.operador1.replace("#", "")).append("\n");
                     asm.append("INT 21h\n");
+                    asm.append("CALL PRINT_TEXT\n"); // Llama a la función de impresión que se debe definir en ensamblador
                 } else {
                     // Asumimos que es un número
                     reg1 = registros[0];

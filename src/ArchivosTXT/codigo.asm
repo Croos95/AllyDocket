@@ -1,12 +1,12 @@
 .MODEL SMALL
 .STACK 100h
 .DATA
+resultado_mod DW 0
+HOLA DB 10,13 , 'HOLA $'
 num DW 29
 i DW 0
 A DW 20
 B DW 10
-resultado_mod DW 0
-HOLA DB 10,13 , 'HOLA $'
 T0 DW ?
 T1 DW ?
 .CODE
@@ -25,7 +25,7 @@ MOV B, AX
 MOV AX, 0
 MOV resultado_mod, AX
 MOV AX, i
-CMP AX, A
+CMP AX, BX
 JGE GOTO Label1
 MOV AX, A
 MOV BX, B
@@ -35,19 +35,21 @@ MOV AX, T0
 MOV i, AX
 Label1:
 MOV AX, i
-CMP AX, resultado_mod
+CMP AX, BX
 JE GOTO Label2
 MOV AX, i
 SUB AX, B
 MOV T1, AX
 MOV AX, T1
 MOV i, AX
-MOV AX, i
-CALL PRINT_NUM
 JMP Label1
 Label2:
-MOV AX, resultado_mod
+MOV AX, A
 CALL PRINT_NUM
+MOV AH, 09h
+LEA DX, HOLA
+INT 21h
+CALL PRINT_TEXT
 MOV AX, 4C00h
 INT 21h
 PRINT_NUM:

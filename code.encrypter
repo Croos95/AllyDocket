@@ -4,7 +4,7 @@ VARIABLES{
 	ENTERO #A=20;
 	ENTERO #B=10;
 	ENTERO #resultado_mod  = 0;
- 	TEXTO #HOLA ="HOLA";
+ 	TEXTO #HOLA ="HolaSoyUnEjemplo";
 }
 PROCESOS{
 	SI(#i<<#A){
@@ -13,10 +13,7 @@ PROCESOS{
 
 	MIENTRAS(#i != #resultado_mod){
 		RESTA[#i,#B]= #i ;
-		IMPRIMIR[#i];
-
 	}
-
-	IMPRIMIR[#i];
-	IMPRIMIR[#resultado_mod];
+	IMPRIMIR[#A];
+	IMPRIMIR[#HOLA];
 }

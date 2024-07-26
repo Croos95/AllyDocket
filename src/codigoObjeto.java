@@ -1,22 +1,26 @@
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class codigoObjeto {
 
     public StringBuilder asm;
     private Set<String> etiquetasUsadas;
-    private Set<String> variablesDeclaradas;
     private Set<String> temporalesDeclarados;
     private ArrayList<String> labels;
+    private Map<String, String> variablesDeclaradas; // Mapa para almacenar las variables con sus declaraciones completas
+
     public codigoObjeto() {
         asm = new StringBuilder();
         asm.setLength(0);
         etiquetasUsadas = new HashSet<>();
-        variablesDeclaradas = new HashSet<>();
         temporalesDeclarados = new HashSet<>();
         labels = new ArrayList<>();
+        variablesDeclaradas = new HashMap<>(); // Inicializar el mapa de variables
         // Inicializar la cabecera del ensamblador
         asm.append(".MODEL SMALL\n");
         asm.append(".STACK 100h\n");
@@ -25,11 +29,11 @@ public class codigoObjeto {
 
     // Método para agregar una variable
     public void agregarVariable(String nombre, String valor) {
-        if (!variablesDeclaradas.contains(nombre)) {
+        if (!variablesDeclaradas.containsKey(nombre)) {
             String tipo = determinarTipo(valor);
             String declaracion = nombre.replace("#", "") + " " + tipo + " " + formatearValor(valor, tipo) + "\n";
             asm.append(declaracion);
-            variablesDeclaradas.add(nombre);
+            variablesDeclaradas.put(nombre, declaracion); // Almacenar la declaración completa de la variable
         }
     }
 
@@ -80,6 +84,22 @@ public class codigoObjeto {
 
     // Método para generar código objeto a partir del código intermedio
     public void generarCodigoObjeto(List<codigoIntermedio.Quadruple> codigoIntermedio) {
+        // Reinicializar valores excepto las variables declaradas
+        asm = new StringBuilder();
+        etiquetasUsadas = new HashSet<>();
+        temporalesDeclarados = new HashSet<>();
+        labels = new ArrayList<>();
+
+        // Inicializar la cabecera del ensamblador
+        asm.append(".MODEL SMALL\n");
+        asm.append(".STACK 100h\n");
+        asm.append(".DATA\n");
+
+        // Volver a agregar las variables ya declaradas
+        for (String declaracion : variablesDeclaradas.values()) {
+            asm.append(declaracion);
+        }
+
         for (codigoIntermedio.Quadruple quad : codigoIntermedio) {
             // Agregar temporales a la sección .DATA si no están declarados
             if (quad.resultado.startsWith("T")) {
@@ -189,14 +209,12 @@ public class codigoObjeto {
                 asm.append("MOV ").append(quad.resultado.replace("#", "")).append(", ").append(reg1).append("\n");
                 break;
             case "LABEL":
-                
                 if (!labels.contains(quad.resultado)) {
                     asm.append(quad.resultado).append(":\n");
                     labels.add(quad.resultado);
-                }else{
+                } else {
                     break;
                 }
-                
                 break;
             case "GOTO":
                 asm.append("JMP ").append(quad.resultado).append("\n");
@@ -210,11 +228,10 @@ public class codigoObjeto {
                 reg1 = registros[0];
                 reg2 = registros[1];
                 asm.append("MOV ").append(reg1).append(", ").append(quad.operador1.replace("#", "")).append("\n");
-                asm.append("CMP ").append(reg1).append(", ").append(quad.operador2.replace("#", "")).append("\n");
+                asm.append("CMP ").append(reg1).append(", ").append(reg2).append("\n");
                 traducirSaltoCondicional(quad.operador, quad.resultado);
                 break;
             case "IMPRIMIR":
-                
                 String tipo = Compilador.identificadores.get(quad.operador1);
                 if (tipo.equals("TEXTO")) {
                     // Asumimos que es una variable de texto
